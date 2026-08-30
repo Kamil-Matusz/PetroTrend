@@ -1,4 +1,4 @@
-﻿package com.petrotrend.PetroTrend.exceptions;
+package com.petrotrend.PetroTrend.exceptions;
 
 import lombok.Getter;
 
