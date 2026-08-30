@@ -23,7 +23,7 @@ import java.time.LocalDate;
 @AllArgsConstructor
 @Document(collection = "fuel_prices")
 @CompoundIndex(
-        name = "uk_symbol_currency_date",
+        name = "fuelSymbol_1_currency_1_date_-1_index",
         def = "{'fuelSymbol': 1, 'currency': 1, 'date': -1}",
         unique = true)
 public class FuelPrice {

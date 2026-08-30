@@ -1,3 +1,10 @@
+application:
+  name: PetroTrend
+
 spring:
   application:
     name: PetroTrend
+  data:
+    mongodb:
+      database: petrotrend
+      auto-index-creation: true
