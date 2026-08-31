@@ -1,4 +1,4 @@
-﻿package com.petrotrend.PetroTrend.errors;
+package com.petrotrend.PetroTrend.errors;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonInclude;

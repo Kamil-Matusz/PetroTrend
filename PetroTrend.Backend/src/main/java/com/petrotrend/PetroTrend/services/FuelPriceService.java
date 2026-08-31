@@ -1,27 +1,55 @@
 package com.petrotrend.PetroTrend.services;
 
+import com.petrotrend.PetroTrend.dto.FuelPriceFilter;
 import com.petrotrend.PetroTrend.dto.FuelPriceRequest;
 import com.petrotrend.PetroTrend.dto.FuelPriceResponse;
 import com.petrotrend.PetroTrend.entities.FuelPrice;
 import com.petrotrend.PetroTrend.exceptions.FuelPriceAlreadyExistsException;
 import com.petrotrend.PetroTrend.exceptions.FuelPriceNotFoundException;
+import com.petrotrend.PetroTrend.exceptions.InvalidDateRangeException;
+import com.petrotrend.PetroTrend.exceptions.InvalidSortPropertyException;
 import com.petrotrend.PetroTrend.mappers.FuelPriceMapper;
 import com.petrotrend.PetroTrend.repositories.FuelPriceRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.dao.DuplicateKeyException;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 
+import java.time.LocalDate;
+import java.time.YearMonth;
 import java.util.List;
+import java.util.Set;
 
 @Service
 @RequiredArgsConstructor
 public class FuelPriceService {
+
+    private static final Set<String> SORTABLE_PROPERTIES = Set.of("date", "price");
 
     private final FuelPriceRepository fuelPriceRepository;
     private final FuelPriceMapper fuelPriceMapper;
 
     public List<FuelPriceResponse> findAll() {
         return fuelPriceMapper.convertToResponses(fuelPriceRepository.findAll());
+    }
+
+    public Page<FuelPriceResponse> search(final FuelPriceFilter filter, final Pageable pageable) {
+        validateDateRange(filter.from(), filter.to());
+        validateSort(pageable);
+        return fuelPriceRepository.search(filter, pageable).map(fuelPriceMapper::convertToResponse);
+    }
+
+    public List<FuelPriceResponse> findCurrentMonth() {
+        final YearMonth currentMonth = YearMonth.now();
+        return findByDateRange(currentMonth.atDay(1), currentMonth.atEndOfMonth());
+    }
+
+    public List<FuelPriceResponse> findByDateRange(final LocalDate from, final LocalDate to) {
+        validateDateRange(from, to);
+        return fuelPriceMapper.convertToResponses(
+                fuelPriceRepository.findByDateGreaterThanEqualAndDateLessThanEqualOrderByDateDesc(from, to));
     }
 
     public FuelPriceResponse findById(final String id) {
@@ -41,6 +69,20 @@ public class FuelPriceService {
 
     public void delete(final String id) {
         fuelPriceRepository.delete(getOrThrow(id));
+    }
+
+    private static void validateDateRange(final LocalDate from, final LocalDate to) {
+        if (from != null && to != null && from.isAfter(to)) {
+            throw new InvalidDateRangeException(from, to);
+        }
+    }
+
+    private static void validateSort(final Pageable pageable) {
+        for (final Sort.Order order : pageable.getSort()) {
+            if (!SORTABLE_PROPERTIES.contains(order.getProperty())) {
+                throw new InvalidSortPropertyException(order.getProperty(), SORTABLE_PROPERTIES);
+            }
+        }
     }
 
     private FuelPrice getOrThrow(final String id) {

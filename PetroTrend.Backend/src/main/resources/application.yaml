@@ -8,3 +8,6 @@ spring:
     mongodb:
       database: petrotrend
       auto-index-creation: true
+    web:
+      pageable:
+        max-page-size: 100

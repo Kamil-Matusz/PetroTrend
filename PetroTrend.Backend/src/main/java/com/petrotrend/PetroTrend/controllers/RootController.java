@@ -1,4 +1,4 @@
-﻿package com.petrotrend.PetroTrend.controllers;
+package com.petrotrend.PetroTrend.controllers;
 
 import com.petrotrend.PetroTrend.errors.ApiError;
 import org.springframework.http.HttpStatusCode;
