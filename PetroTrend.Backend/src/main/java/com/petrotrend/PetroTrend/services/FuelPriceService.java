@@ -49,7 +49,7 @@ public class FuelPriceService {
     public List<FuelPriceResponse> findByDateRange(final LocalDate from, final LocalDate to) {
         validateDateRange(from, to);
         return fuelPriceMapper.convertToResponses(
-                fuelPriceRepository.findByDateGreaterThanEqualAndDateLessThanEqualOrderByDateDesc(from, to));
+                fuelPriceRepository.findInDateRange(from, to));
     }
 
     public FuelPriceResponse findById(final String id) {

@@ -54,7 +54,7 @@ class FuelPriceServiceTest {
     @Test
     void currentMonthQueriesFirstAndLastDayOfCurrentMonth() {
         //given
-        when(fuelPriceRepository.findByDateGreaterThanEqualAndDateLessThanEqualOrderByDateDesc(any(), any()))
+        when(fuelPriceRepository.findInDateRange(any(), any()))
                 .thenReturn(List.of());
         when(fuelPriceMapper.convertToResponses(List.of())).thenReturn(List.of());
 
@@ -62,7 +62,7 @@ class FuelPriceServiceTest {
         fuelPriceService.findCurrentMonth();
 
         //then
-        verify(fuelPriceRepository).findByDateGreaterThanEqualAndDateLessThanEqualOrderByDateDesc(
+        verify(fuelPriceRepository).findInDateRange(
                 fromCaptor.capture(), toCaptor.capture());
         final YearMonth expected = YearMonth.now();
         assertThat(fromCaptor.getValue()).isEqualTo(expected.atDay(1));
@@ -80,7 +80,7 @@ class FuelPriceServiceTest {
         assertThatThrownBy(() -> fuelPriceService.findByDateRange(from, to))
                 .isInstanceOf(InvalidDateRangeException.class);
         verify(fuelPriceRepository, never())
-                .findByDateGreaterThanEqualAndDateLessThanEqualOrderByDateDesc(any(), any());
+                .findInDateRange(any(), any());
     }
 
     @Test

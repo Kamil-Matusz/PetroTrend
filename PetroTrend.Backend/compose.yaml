@@ -1,6 +1,6 @@
 services:
   mongodb:
-    image: 'mongo:latest'
+    image: 'mongo:8'
     environment:
       - 'MONGO_INITDB_DATABASE=petrotrend'
       - 'MONGO_INITDB_ROOT_PASSWORD=secret'
