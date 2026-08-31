@@ -6,6 +6,7 @@ import com.petrotrend.PetroTrend.dto.FuelPriceResponse;
 import com.petrotrend.PetroTrend.services.FuelPriceService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import org.springdoc.core.annotations.ParameterObject;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.data.web.PageableDefault;
@@ -54,8 +55,8 @@ public class FuelPriceController {
 
     @GetMapping("/search")
     public PagedModel<FuelPriceResponse> searchFuelPrices(
-                                                          @ModelAttribute final FuelPriceFilter filter,
-                                                          @PageableDefault(size = 20, sort = "date", direction = Sort.Direction.DESC) final Pageable pageable) {
+                                                          @ParameterObject @ModelAttribute final FuelPriceFilter filter,
+                                                          @ParameterObject @PageableDefault(size = 20, sort = "date", direction = Sort.Direction.DESC) final Pageable pageable) {
         return new PagedModel<>(fuelPriceService.search(filter, pageable));
     }
 

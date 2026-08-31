@@ -35,6 +35,11 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 @WebMvcTest(controllers = FuelPriceController.class)
 class FuelPriceControllerTest {
 
+    private static final String BASE_PATH = "/api/fuelPrices";
+    private static final String SEARCH_PATH = BASE_PATH + "/search";
+    private static final String CURRENT_MONTH_PATH = BASE_PATH + "/currentMonth";
+    private static final String RANGE_PATH = BASE_PATH + "/range";
+
     private static final FuelPriceFilter EMPTY_FILTER = new FuelPriceFilter(null, null, null, null);
 
     @Autowired
@@ -50,7 +55,7 @@ class FuelPriceControllerTest {
         when(fuelPriceService.search(any(), any())).thenReturn(new PageImpl<>(List.of(), expectedPageable, 0));
 
         //when
-        mockMvc.perform(get("/api/fuelPrices/search")
+        mockMvc.perform(get(SEARCH_PATH)
                         .param("fuelSymbol", "ON")
                         .param("currency", "PLN")
                         .param("from", "2026-08-01")
@@ -61,8 +66,7 @@ class FuelPriceControllerTest {
                 //then
                 .andExpect(status().isOk());
         verify(fuelPriceService).search(
-                eq(new FuelPriceFilter(FuelSymbol.ON, Currency.PLN,
-                        LocalDate.of(2026, 8, 1), LocalDate.of(2026, 8, 31))),
+                eq(new FuelPriceFilter(FuelSymbol.ON, Currency.PLN, LocalDate.of(2026, 8, 1), LocalDate.of(2026, 8, 31))),
                 eq(expectedPageable));
     }
 
@@ -72,7 +76,7 @@ class FuelPriceControllerTest {
         when(fuelPriceService.search(any(), any())).thenReturn(new PageImpl<>(List.of()));
 
         //when
-        mockMvc.perform(get("/api/fuelPrices/search"))
+        mockMvc.perform(get(SEARCH_PATH))
                 //then
                 .andExpect(status().isOk());
         verify(fuelPriceService).search(
@@ -86,7 +90,7 @@ class FuelPriceControllerTest {
         when(fuelPriceService.search(any(), any())).thenReturn(new PageImpl<>(List.of()));
 
         //when
-        mockMvc.perform(get("/api/fuelPrices/search").param("size", "999999"))
+        mockMvc.perform(get(SEARCH_PATH).param("size", "999999"))
                 //then
                 .andExpect(status().isOk());
         verify(fuelPriceService).search(
@@ -100,12 +104,11 @@ class FuelPriceControllerTest {
         final FuelPriceResponse response = new FuelPriceResponse(
                 "id-1", FuelSymbol.ON, Currency.PLN, new BigDecimal("6.49"),
                 LocalDate.of(2026, 8, 15), "orlen", null);
-        when(fuelPriceService.search(any(), any()))
-                .thenReturn(new PageImpl<>(List.of(response), PageRequest.of(1, 5), 42));
+        when(fuelPriceService.search(any(), any())).thenReturn(new PageImpl<>(List.of(response), PageRequest.of(1, 5), 42));
 
         //when
         final String body = mockMvc.perform(
-                        get("/api/fuelPrices/search").param("page", "1").param("size", "5"))
+                        get(SEARCH_PATH).param("page", "1").param("size", "5"))
                 //then
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.content[0].id").value("id-1"))
@@ -121,7 +124,7 @@ class FuelPriceControllerTest {
     void searchRejectsUnknownEnumValue() throws Exception {
         //given
         //when
-        mockMvc.perform(get("/api/fuelPrices/search").param("fuelSymbol", "NOPE"))
+        mockMvc.perform(get(SEARCH_PATH).param("fuelSymbol", "NOPE"))
                 //then
                 .andExpect(status().isBadRequest());
     }
@@ -133,7 +136,7 @@ class FuelPriceControllerTest {
                 new InvalidDateRangeException(LocalDate.of(2026, 8, 31), LocalDate.of(2026, 8, 1)));
 
         //when
-        mockMvc.perform(get("/api/fuelPrices/search").param("from", "2026-08-31").param("to", "2026-08-01"))
+        mockMvc.perform(get(SEARCH_PATH).param("from", "2026-08-31").param("to", "2026-08-01"))
                 //then
                 .andExpect(status().isBadRequest())
                 .andExpect(jsonPath("$.reasonCode").value("INVALID_DATE_RANGE"));
@@ -146,7 +149,7 @@ class FuelPriceControllerTest {
                 .thenThrow(new InvalidSortPropertyException("source", Set.of("date", "price")));
 
         //when
-        mockMvc.perform(get("/api/fuelPrices/search").param("sort", "date"))
+        mockMvc.perform(get(SEARCH_PATH).param("sort", "date"))
                 //then
                 .andExpect(status().isBadRequest())
                 .andExpect(jsonPath("$.reasonCode").value("INVALID_SORT_PROPERTY"));
@@ -158,7 +161,7 @@ class FuelPriceControllerTest {
         when(fuelPriceService.findCurrentMonth()).thenReturn(List.of());
 
         //when
-        mockMvc.perform(get("/api/fuelPrices/currentMonth"))
+        mockMvc.perform(get(CURRENT_MONTH_PATH))
                 //then
                 .andExpect(status().isOk())
                 .andExpect(content().json("[]"));
@@ -171,7 +174,7 @@ class FuelPriceControllerTest {
         when(fuelPriceService.search(any(), any())).thenReturn(new PageImpl<>(List.of()));
 
         //when
-        mockMvc.perform(get("/api/fuelPrices/search"))
+        mockMvc.perform(get(SEARCH_PATH))
                 //then
                 .andExpect(status().isOk());
         verify(fuelPriceService).search(any(), any());
@@ -183,7 +186,7 @@ class FuelPriceControllerTest {
         when(fuelPriceService.findByDateRange(any(), any())).thenReturn(List.of());
 
         //when
-        mockMvc.perform(get("/api/fuelPrices/range").param("from", "2026-08-01").param("to", "2026-08-31"))
+        mockMvc.perform(get(RANGE_PATH).param("from", "2026-08-01").param("to", "2026-08-31"))
                 //then
                 .andExpect(status().isOk());
         verify(fuelPriceService).findByDateRange(LocalDate.of(2026, 8, 1), LocalDate.of(2026, 8, 31));
