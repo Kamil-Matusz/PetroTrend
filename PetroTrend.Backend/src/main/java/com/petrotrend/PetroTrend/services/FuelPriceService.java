@@ -44,8 +44,7 @@ public class FuelPriceService {
     }
 
     private FuelPrice getOrThrow(final String id) {
-        return fuelPriceRepository.findById(id)
-                .orElseThrow(() -> new FuelPriceNotFoundException(id));
+        return fuelPriceRepository.findById(id).orElseThrow(() -> new FuelPriceNotFoundException(id));
     }
 
     private FuelPrice save(final FuelPrice fuelPrice, final FuelPriceRequest request) {
