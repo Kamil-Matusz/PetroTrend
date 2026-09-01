@@ -11,8 +11,6 @@ export const formatPrice = (value: number) => price2.format(value)
 export const formatMoney = (value: number, currency: Currency) =>
   new Intl.NumberFormat('pl-PL', { style: 'currency', currency, minimumFractionDigits: 2 }).format(value)
 
-export const formatDelta = (value: number) => `${value > 0 ? '+' : value < 0 ? '−' : ''}${price2.format(Math.abs(value))}`
-
 export const formatDayShort = (iso: string) => day.format(parseIso(iso))
 export const formatDayLong = (iso: string) => dayFull.format(parseIso(iso))
 export const formatDayNumeric = (iso: string) => dayNumeric.format(parseIso(iso))

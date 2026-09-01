@@ -2,10 +2,13 @@ package com.petrotrend.PetroTrend.repositories;
 
 import com.petrotrend.PetroTrend.dto.FuelPriceFilter;
 import com.petrotrend.PetroTrend.entities.FuelPrice;
+import com.petrotrend.PetroTrend.enums.FuelSymbol;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.data.mongodb.core.MongoTemplate;
+import org.springframework.data.mongodb.core.aggregation.Aggregation;
 import org.springframework.data.mongodb.core.query.Criteria;
 import org.springframework.data.mongodb.core.query.Query;
 import org.springframework.data.support.PageableExecutionUtils;
@@ -13,6 +16,7 @@ import org.springframework.data.support.PageableExecutionUtils;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
+import java.util.Set;
 
 @RequiredArgsConstructor
 class FuelPriceRepositoryImpl implements FuelPriceRepositoryCustom {
@@ -26,6 +30,17 @@ class FuelPriceRepositoryImpl implements FuelPriceRepositoryCustom {
         final List<FuelPrice> content = mongoTemplate.find(query, FuelPrice.class);
         return PageableExecutionUtils.getPage(content, pageable,
                 () -> mongoTemplate.count(Query.of(query).limit(-1).skip(-1), FuelPrice.class));
+    }
+
+    @Override
+    public List<FuelPrice> findLatestPerFuel(final Set<FuelSymbol> fuelSymbols) {
+        final Aggregation aggregation = Aggregation.newAggregation(
+                Aggregation.match(Criteria.where("fuelSymbol").in(fuelSymbols)),
+                Aggregation.sort(Sort.by(Sort.Direction.DESC, "date", "createdAt")),
+                Aggregation.group("fuelSymbol", "currency").first(Aggregation.ROOT).as("latest"),
+                Aggregation.replaceRoot("latest"),
+                Aggregation.sort(Sort.by(Sort.Direction.ASC, "fuelSymbol", "currency")));
+        return mongoTemplate.aggregate(aggregation, FuelPrice.class, FuelPrice.class).getMappedResults();
     }
 
     private static List<Criteria> toCriteria(final FuelPriceFilter filter) {

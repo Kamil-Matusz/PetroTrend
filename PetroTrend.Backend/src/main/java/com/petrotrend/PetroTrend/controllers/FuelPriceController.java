@@ -3,6 +3,7 @@ package com.petrotrend.PetroTrend.controllers;
 import com.petrotrend.PetroTrend.dto.FuelPriceFilter;
 import com.petrotrend.PetroTrend.dto.FuelPriceRequest;
 import com.petrotrend.PetroTrend.dto.FuelPriceResponse;
+import com.petrotrend.PetroTrend.enums.FuelSymbol;
 import com.petrotrend.PetroTrend.services.FuelPriceService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -28,6 +29,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 import java.time.LocalDate;
 import java.util.List;
+import java.util.Set;
 
 @RestController
 @RequestMapping("/api/fuelPrices")
@@ -39,6 +41,11 @@ public class FuelPriceController {
     @GetMapping
     public List<FuelPriceResponse> findAllFuelPrices() {
         return fuelPriceService.findAll();
+    }
+
+    @GetMapping("/latest")
+    public List<FuelPriceResponse> findLatestFuelPrices(@RequestParam(defaultValue = "ON,PB95") final Set<FuelSymbol> fuelSymbols) {
+        return fuelPriceService.findLatestPerFuel(fuelSymbols);
     }
 
     @GetMapping("/currentMonth")

@@ -25,7 +25,7 @@ Docker must be running for both `bootRun` and `test`:
 
 ## API surface
 
-`/api/fuelPrices` - `GET` (all), `GET /currentMonth`, `GET /range?from=&to=`, `GET /search`, `GET /{id}`, `POST`, `PUT /{id}`, `DELETE /{id}`.
+`/api/fuelPrices` - `GET` (all), `GET /latest?fuelSymbols=` (defaults to `ON,PB95`), `GET /currentMonth`, `GET /range?from=&to=`, `GET /search`, `GET /{id}`, `POST`, `PUT /{id}`, `DELETE /{id}`.
 OpenAPI JSON at `/v3/api-docs`, Scalar UI at `/scalar`. Actuator is on the classpath.
 
 ## Architecture

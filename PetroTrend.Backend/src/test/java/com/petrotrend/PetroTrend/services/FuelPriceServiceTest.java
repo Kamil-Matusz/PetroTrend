@@ -2,6 +2,7 @@ package com.petrotrend.PetroTrend.services;
 
 import com.petrotrend.PetroTrend.dto.FuelPriceFilter;
 import com.petrotrend.PetroTrend.entities.FuelPrice;
+import com.petrotrend.PetroTrend.enums.FuelSymbol;
 import com.petrotrend.PetroTrend.exceptions.InvalidDateRangeException;
 import com.petrotrend.PetroTrend.exceptions.InvalidSortPropertyException;
 import com.petrotrend.PetroTrend.mappers.FuelPriceMapper;
@@ -22,6 +23,7 @@ import org.springframework.data.domain.Sort;
 import java.time.LocalDate;
 import java.time.YearMonth;
 import java.util.List;
+import java.util.Set;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatCode;
@@ -50,6 +52,22 @@ class FuelPriceServiceTest {
 
     @Captor
     private ArgumentCaptor<LocalDate> toCaptor;
+
+    @Test
+    void latestPerFuelPassesRequestedSymbolsToTheRepository() {
+        //given
+        final Set<FuelSymbol> fuelSymbols = Set.of(FuelSymbol.ON, FuelSymbol.PB95);
+        final List<FuelPrice> latest = List.of(new FuelPrice());
+        when(fuelPriceRepository.findLatestPerFuel(fuelSymbols)).thenReturn(latest);
+        when(fuelPriceMapper.convertToResponses(latest)).thenReturn(List.of());
+
+        //when
+        fuelPriceService.findLatestPerFuel(fuelSymbols);
+
+        //then
+        verify(fuelPriceRepository).findLatestPerFuel(fuelSymbols);
+        verify(fuelPriceMapper).convertToResponses(latest);
+    }
 
     @Test
     void currentMonthQueriesFirstAndLastDayOfCurrentMonth() {

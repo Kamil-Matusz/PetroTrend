@@ -47,7 +47,7 @@
   grid-template-columns: minmax(0, 1fr) auto;
   grid-template-areas:
     'grade price'
-    'delta price';
+    'stamp price';
   align-items: center;
   column-gap: 16px;
   padding: 12px 0;
@@ -81,7 +81,7 @@
   white-space: nowrap;
 }
 
-/* Sodium-lit digits — the one place the accent is allowed to glow. */
+/* Sodium-lit digits - the one place the accent is allowed to glow. */
 .pylon__price {
   grid-area: price;
   font-weight: 600;
@@ -97,34 +97,13 @@
   text-shadow: none;
 }
 
-.pylon__delta {
-  grid-area: delta;
+.pylon__stamp {
+  grid-area: stamp;
   display: inline-flex;
   align-items: center;
   gap: 6px;
-  font-size: 14px;
-  color: var(--vapour);
-}
-
-.pylon__delta--rise {
-  color: var(--rise);
-}
-
-.pylon__delta--fall {
-  color: var(--fall);
-}
-
-.pylon__delta--none {
-  color: var(--dim);
   font-size: 13px;
-}
-
-.pylon__delta-sr {
-  position: absolute;
-  width: 1px;
-  height: 1px;
-  overflow: hidden;
-  clip-path: inset(50%);
+  color: var(--dim);
 }
 
 .pylon__foot {
@@ -163,7 +142,7 @@
     grid-template-areas:
       'grade'
       'price'
-      'delta';
+      'stamp';
     row-gap: 4px;
   }
 

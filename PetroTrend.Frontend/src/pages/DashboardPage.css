@@ -42,6 +42,42 @@
   font-size: 14px;
 }
 
+.dash__fuels {
+  display: flex;
+  justify-content: center;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+/* Same shape-plus-symbol key as the chart legend - colour is never the only cue. */
+.dash__fuel-key {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  padding: 8px 12px;
+  border: 1px solid var(--kerb);
+  border-radius: var(--gauge);
+  background: var(--slab-2);
+  color: var(--sign);
+  font-family: var(--display);
+  font-weight: 600;
+  font-size: 14px;
+  letter-spacing: 0.06em;
+  transition: opacity 0.15s, border-color 0.15s;
+}
+
+.dash__fuel-key:hover:not(:disabled) {
+  border-color: var(--dim);
+}
+
+.dash__fuel-key--off {
+  opacity: 0.4;
+}
+
+.dash__fuel-key:disabled {
+  cursor: default;
+}
+
 .dash__panel {
   overflow: hidden;
 }

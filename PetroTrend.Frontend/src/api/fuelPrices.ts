@@ -3,12 +3,22 @@ import type {
   FuelPriceFilter,
   FuelPriceRequest,
   FuelPriceResponse,
+  FuelSymbol,
   PageRequest,
   PagedModel,
 } from './types'
 
 export function findAll(): Promise<FuelPriceResponse[]> {
   return request('/fuelPrices')
+}
+
+/**
+ * One row per fuel/currency pair - the newest reading, no history. Omit `fuelSymbols` to get the
+ * backend's own default set; the default is deliberately not repeated here.
+ */
+export function findLatest(fuelSymbols?: readonly FuelSymbol[]): Promise<FuelPriceResponse[]> {
+  const query = fuelSymbols?.length ? `?fuelSymbols=${fuelSymbols.join(',')}` : ''
+  return request(`/fuelPrices/latest${query}`)
 }
 
 export function findCurrentMonth(): Promise<FuelPriceResponse[]> {

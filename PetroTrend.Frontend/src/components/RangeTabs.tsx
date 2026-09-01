@@ -2,7 +2,13 @@ import type { RangeKey } from '../lib/range'
 import { RANGE_LABELS } from '../lib/range'
 import './RangeTabs.css'
 
-export function RangeTabs({ value, onChange }: { value: RangeKey; onChange: (key: RangeKey) => void }) {
+export function RangeTabs({
+  value,
+  onChange,
+}: {
+  value: RangeKey | null
+  onChange: (key: RangeKey) => void
+}) {
   return (
     <div className="range" role="group" aria-label="Zakres dat">
       {(Object.keys(RANGE_LABELS) as RangeKey[]).map((key) => (

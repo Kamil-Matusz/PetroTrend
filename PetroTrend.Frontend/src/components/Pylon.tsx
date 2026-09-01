@@ -1,42 +1,23 @@
 import type { Currency, FuelSymbol } from '../api/types'
-import { FUEL_SYMBOLS } from '../api/types'
 import { CURRENCY_SUFFIX, FUEL_META } from '../lib/fuel'
-import { formatDayLong, formatDelta, formatPrice } from '../lib/format'
+import { formatDayLong, formatDayNumeric, formatPrice } from '../lib/format'
 import { FuelMark } from './FuelChip'
 import { RollingDigits } from './RollingDigits'
 import './Pylon.css'
 
 export type PylonReading = {
   price: number
-  delta: number | null
   date: string
 }
 
 type PylonProps = {
+  symbols: readonly FuelSymbol[]
   readings: Partial<Record<FuelSymbol, PylonReading>>
   currency: Currency
 }
 
-function Delta({ delta }: { delta: number | null }) {
-  if (delta === null) {
-    return <span className="pylon__delta pylon__delta--none">pierwszy odczyt</span>
-  }
-
-  const direction = delta > 0 ? 'rise' : delta < 0 ? 'fall' : 'flat'
-  const arrow = delta > 0 ? '▲' : delta < 0 ? '▼' : '•'
-  const label = delta > 0 ? 'wzrost' : delta < 0 ? 'spadek' : 'bez zmiany'
-
-  return (
-    <span className={`pylon__delta pylon__delta--${direction}`}>
-      <span aria-hidden="true">{arrow}</span>
-      <span className="num">{formatDelta(delta)}</span>
-      <span className="pylon__delta-sr">{label} względem poprzedniego odczytu</span>
-    </span>
-  )
-}
-
-export function Pylon({ readings, currency }: PylonProps) {
-  const dates = FUEL_SYMBOLS.map((s) => readings[s]?.date).filter(Boolean) as string[]
+export function Pylon({ symbols, readings, currency }: PylonProps) {
+  const dates = symbols.map((s) => readings[s]?.date).filter(Boolean) as string[]
   const latest = dates.sort().at(-1)
 
   return (
@@ -48,7 +29,7 @@ export function Pylon({ readings, currency }: PylonProps) {
         </div>
 
         <ul className="pylon__rows">
-          {FUEL_SYMBOLS.map((symbol) => {
+          {symbols.map((symbol) => {
             const reading = readings[symbol]
             return (
               <li key={symbol} className="pylon__row">
@@ -62,7 +43,13 @@ export function Pylon({ readings, currency }: PylonProps) {
                   {reading ? <RollingDigits value={formatPrice(reading.price)} /> : '—,——'}
                 </span>
 
-                {reading ? <Delta delta={reading.delta} /> : <span className="pylon__delta pylon__delta--none">brak danych</span>}
+                <span className="pylon__stamp">
+                  {reading ? (
+                    <span className="num">{formatDayNumeric(reading.date)}</span>
+                  ) : (
+                    'brak danych'
+                  )}
+                </span>
               </li>
             )
           })}

@@ -4,6 +4,7 @@ import com.petrotrend.PetroTrend.dto.FuelPriceFilter;
 import com.petrotrend.PetroTrend.dto.FuelPriceRequest;
 import com.petrotrend.PetroTrend.dto.FuelPriceResponse;
 import com.petrotrend.PetroTrend.entities.FuelPrice;
+import com.petrotrend.PetroTrend.enums.FuelSymbol;
 import com.petrotrend.PetroTrend.exceptions.FuelPriceAlreadyExistsException;
 import com.petrotrend.PetroTrend.exceptions.FuelPriceNotFoundException;
 import com.petrotrend.PetroTrend.exceptions.InvalidDateRangeException;
@@ -39,6 +40,10 @@ public class FuelPriceService {
         validateDateRange(filter.from(), filter.to());
         validateSort(pageable);
         return fuelPriceRepository.search(filter, pageable).map(fuelPriceMapper::convertToResponse);
+    }
+
+    public List<FuelPriceResponse> findLatestPerFuel(final Set<FuelSymbol> fuelSymbols) {
+        return fuelPriceMapper.convertToResponses(fuelPriceRepository.findLatestPerFuel(fuelSymbols));
     }
 
     public List<FuelPriceResponse> findCurrentMonth() {

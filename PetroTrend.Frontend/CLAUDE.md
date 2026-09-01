@@ -63,9 +63,18 @@ write rather than mutating any cache. There is no cache, no dedupe, no shared st
 
 ## Pages
 
-- **Dashboard** (`/`, `DashboardPage`) - fetches `GET /fuelPrices/range` for the selected window
-  and filters by currency **client-side**, then derives the pylon readings (last price per grade
-  plus the step from the reading before it) and the recent-readings list with `useMemo`.
+- **Dashboard** (`/`, `DashboardPage`) - two independent `useAsync` calls. On mount only
+  `GET /fuelPrices/latest?fuelSymbols=` runs; it returns one row per fuel **and currency**
+  (newest `date`, then `createdAt`), which fills the pylon directly - no history, so the pylon
+  shows price plus that grade's own reading date and no change arrow. Which grades appear is a
+  `selection` state where `null` means "the backend's default set": on `null` the param is
+  omitted and the shown grades are derived from the symbols the response contains, so the
+  default (`ON,PB95` today) lives in the backend only and is **not** mirrored here. The
+  `.dash__fuel-key` toggles switch `selection` to an explicit list - the last active grade can't
+  be switched off, because an empty list would read as "default" again. History is opt-in:
+  `range` starts `null` and `GET /fuelPrices/range` fires only once a `RangeTabs` key is picked,
+  feeding `TrendChart` and the recent-readings list. Both responses are filtered by currency
+  **client-side**.
 - **Records** (`/notowania`, `RecordsPage`) - `GET /fuelPrices/search` with server-side filtering,
   sorting and pagination; every filter/sort/size change resets `page` to 0. Owns all CRUD: create,
   edit and delete each run through a single `Dialog` discriminated union rendered into `Modal`.

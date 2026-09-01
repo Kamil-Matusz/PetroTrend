@@ -25,6 +25,7 @@ import java.util.Set;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
@@ -39,6 +40,7 @@ class FuelPriceControllerTest {
     private static final String SEARCH_PATH = BASE_PATH + "/search";
     private static final String CURRENT_MONTH_PATH = BASE_PATH + "/currentMonth";
     private static final String RANGE_PATH = BASE_PATH + "/range";
+    private static final String LATEST_PATH = BASE_PATH + "/latest";
 
     private static final FuelPriceFilter EMPTY_FILTER = new FuelPriceFilter(null, null, null, null);
 
@@ -153,6 +155,46 @@ class FuelPriceControllerTest {
                 //then
                 .andExpect(status().isBadRequest())
                 .andExpect(jsonPath("$.reasonCode").value("INVALID_SORT_PROPERTY"));
+    }
+
+    @Test
+    void latestDefaultsToDieselAndPetrol95() throws Exception {
+        //given
+        when(fuelPriceService.findLatestPerFuel(any())).thenReturn(List.of(
+                new FuelPriceResponse("1", FuelSymbol.ON, Currency.PLN, new BigDecimal("6.49"),
+                        LocalDate.of(2026, 8, 31), "orlen", null)));
+
+        //when
+        mockMvc.perform(get(LATEST_PATH))
+                //then
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.length()").value(1))
+                .andExpect(jsonPath("$[0].fuelSymbol").value("ON"))
+                .andExpect(jsonPath("$[0].date").value("2026-08-31"));
+        verify(fuelPriceService).findLatestPerFuel(Set.of(FuelSymbol.ON, FuelSymbol.PB95));
+    }
+
+    @Test
+    void latestBindsExplicitlySelectedFuelSymbols() throws Exception {
+        //given
+        when(fuelPriceService.findLatestPerFuel(any())).thenReturn(List.of());
+
+        //when
+        mockMvc.perform(get(LATEST_PATH).param("fuelSymbols", "LPG,PB98"))
+                //then
+                .andExpect(status().isOk())
+                .andExpect(content().json("[]"));
+        verify(fuelPriceService).findLatestPerFuel(Set.of(FuelSymbol.LPG, FuelSymbol.PB98));
+    }
+
+    @Test
+    void latestRejectsUnknownFuelSymbol() throws Exception {
+        //given
+        //when
+        mockMvc.perform(get(LATEST_PATH).param("fuelSymbols", "DIESEL"))
+                //then
+                .andExpect(status().isBadRequest());
+        verify(fuelPriceService, never()).findLatestPerFuel(any());
     }
 
     @Test

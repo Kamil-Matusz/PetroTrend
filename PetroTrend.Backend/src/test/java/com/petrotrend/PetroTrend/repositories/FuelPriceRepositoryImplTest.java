@@ -16,10 +16,13 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.data.mongodb.core.MongoTemplate;
+import org.springframework.data.mongodb.core.aggregation.Aggregation;
+import org.springframework.data.mongodb.core.aggregation.AggregationResults;
 import org.springframework.data.mongodb.core.query.Query;
 
 import java.time.LocalDate;
 import java.util.List;
+import java.util.Set;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.any;
@@ -43,11 +46,35 @@ class FuelPriceRepositoryImplTest {
     @Captor
     private ArgumentCaptor<Query> queryCaptor;
 
+    @Captor
+    private ArgumentCaptor<Aggregation> aggregationCaptor;
+
     private Document searchAndCaptureQueryObject(final FuelPriceFilter filter, final Pageable pageable) {
         when(mongoTemplate.find(any(Query.class), eq(FuelPrice.class))).thenReturn(List.of());
         fuelPriceRepositoryImpl.search(filter, pageable);
         verify(mongoTemplate).find(queryCaptor.capture(), eq(FuelPrice.class));
         return queryCaptor.getValue().getQueryObject();
+    }
+
+    @Test
+    void latestPerFuelGroupsBySymbolAndCurrencyTakingNewestDocument() {
+        //given
+        when(mongoTemplate.aggregate(any(Aggregation.class), eq(FuelPrice.class), eq(FuelPrice.class)))
+                .thenReturn(new AggregationResults<>(List.of(), new Document()));
+
+        //when
+        fuelPriceRepositoryImpl.findLatestPerFuel(Set.of(FuelSymbol.ON, FuelSymbol.PB95));
+
+        //then
+        verify(mongoTemplate).aggregate(aggregationCaptor.capture(), eq(FuelPrice.class), eq(FuelPrice.class));
+        final List<Document> pipeline = aggregationCaptor.getValue().toPipeline(Aggregation.DEFAULT_CONTEXT);
+        assertThat(pipeline.get(0).get("$match", Document.class).get("fuelSymbol", Document.class).get("$in"))
+                .isEqualTo(Set.of(FuelSymbol.ON, FuelSymbol.PB95));
+        assertThat(pipeline.get(1).get("$sort")).isEqualTo(new Document("date", -1).append("createdAt", -1));
+        final Document group = pipeline.get(2).get("$group", Document.class);
+        assertThat(group.get("_id")).isEqualTo(new Document("fuelSymbol", "$fuelSymbol").append("currency", "$currency"));
+        assertThat(group.get("latest")).isEqualTo(new Document("$first", "$$ROOT"));
+        assertThat(pipeline.get(3).get("$replaceRoot")).isEqualTo(new Document("newRoot", "$latest"));
     }
 
     @Test
