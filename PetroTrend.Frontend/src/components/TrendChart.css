@@ -9,6 +9,43 @@
   height: clamp(240px, 38vh, 360px);
 }
 
+/* What the y-axis measures - level, index, spread or period change. */
+.trend__modes {
+  display: inline-flex;
+  align-self: flex-start;
+  border: 1px solid var(--kerb);
+  border-radius: var(--gauge);
+  background: var(--slab-2);
+  overflow: hidden;
+}
+
+.trend__mode {
+  border: none;
+  border-right: 1px solid var(--kerb);
+  background: transparent;
+  color: var(--vapour);
+  padding: 7px 13px;
+  font-family: var(--display);
+  font-weight: 600;
+  font-size: 13px;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  transition: color 0.15s, background 0.15s;
+}
+
+.trend__mode:last-child {
+  border-right: none;
+}
+
+.trend__mode:hover {
+  color: var(--sign);
+}
+
+.trend__mode--on {
+  background: var(--sodium-dim);
+  color: var(--sodium);
+}
+
 .trend__legend {
   display: flex;
   align-items: center;
@@ -23,7 +60,7 @@
   margin-right: auto;
 }
 
-/* Legend doubles as the series filter — shape plus name, never colour alone. */
+/* Legend doubles as the series filter - shape plus name, never colour alone. */
 .trend__key {
   display: inline-flex;
   align-items: center;
@@ -84,7 +121,7 @@
 
 .trend__tip-list li {
   display: grid;
-  grid-template-columns: 12px 44px auto;
+  grid-template-columns: 12px minmax(44px, auto) auto;
   align-items: center;
   gap: 8px;
 }
@@ -97,9 +134,31 @@
 }
 
 .trend__tip-value {
+  display: inline-flex;
+  align-items: baseline;
+  justify-content: flex-end;
+  gap: 5px;
   font-size: 14px;
   color: var(--sign);
   text-align: right;
+}
+
+/* Change and spread readings carry ▲/▼ in the markup, so colour is the second cue. */
+.trend__tip-value--up {
+  color: var(--rise);
+}
+
+.trend__tip-value--down {
+  color: var(--fall);
+}
+
+.trend__tip-value--flat {
+  color: var(--vapour);
+}
+
+.trend__tip-aside {
+  font-size: 12px;
+  color: var(--vapour);
 }
 
 @media (max-width: 560px) {

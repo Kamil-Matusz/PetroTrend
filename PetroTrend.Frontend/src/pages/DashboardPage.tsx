@@ -19,7 +19,7 @@ import './DashboardPage.css'
 export function DashboardPage() {
   const [range, setRange] = useState<RangeKey | null>(null)
   const [currency, setCurrency] = useState<Currency>('PLN')
-  // `null` means "whatever the backend serves by default" — that set is never repeated here.
+  // `null` means "whatever the backend serves by default" - that set is never repeated here.
   const [selection, setSelection] = useState<FuelSymbol[] | null>(null)
 
   const dateWindow = useMemo(() => (range ? rangeToDates(range) : null), [range])
@@ -75,7 +75,7 @@ export function DashboardPage() {
           <h1>Pulpit</h1>
           <p className="dash__window num">
             {dateWindow
-              ? `${formatDayNumeric(dateWindow.from)} — ${formatDayNumeric(dateWindow.to)}`
+              ? `${formatDayNumeric(dateWindow.from)} - ${formatDayNumeric(dateWindow.to)}`
               : 'Ostatnie notowania'}
           </p>
         </div>
@@ -134,7 +134,9 @@ export function DashboardPage() {
       <section className="panel dash__panel">
         <div className="panel__head">
           <h2>Trend</h2>
-          <p className="dash__hint">Kliknij paliwo w legendzie, aby ukryć jego serię.</p>
+          <p className="dash__hint">
+            Tryb zmienia to, co mierzy oś Y. Kliknij paliwo w legendzie, aby ukryć jego serię.
+          </p>
         </div>
 
         {history.loading ? (

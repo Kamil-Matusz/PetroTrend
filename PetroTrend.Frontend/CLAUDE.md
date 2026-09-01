@@ -88,6 +88,24 @@ filtered view don't work today.
 bridges gaps), draws dots only when the window is sparse (≤ 31 points), and labels each line at
 its end. The legend is a set of `aria-pressed` toggle buttons, not recharts' `<Legend>`.
 
+One `ComposedChart` renders four modes, picked by the `.trend__modes` tabs; each mode is a
+different measure on the **same single y-axis** (never a second axis). The pure transforms live in
+`src/lib/trend.ts` - no React, no recharts - so they are testable and the component stays layout:
+
+- **Poziom** - absolute prices, the original lines.
+- **Indeks** - every series rebased to 100 at *its own* first reading in the window, so grades on
+  different price levels compare; `ReferenceLine` at 100.
+- **Spread** - one curated pair at a time (`SPREAD_PAIRS`), rendered as an `Area` in `--sodium`
+  with a zero line. Legs are carried forward, because the two grades aren't always quoted on the
+  same day. In this mode the legend row becomes a single-select pair picker.
+- **Zmiana** - period-over-period bars, weekly buckets up to a 120-day window and monthly beyond
+  it. Each bucket's close is compared with the previous bucket that *had* one, so gaps bridge
+  instead of dropping a bar; the first bucket never gets a bar. Colour stays fuel identity - the
+  sign is carried by the bar's direction and, in the tooltip, by ▲/▼ plus `--rise`/`--fall`.
+
+A mode with nothing to show (spread without a complete pair, change with one bucket) renders
+`Empty` in place of the plot but keeps the tabs, so the user can switch back.
+
 Series identity must never rest on colour alone. `src/lib/fuel.ts` pairs each grade with a colour
 picked for protanopia/deuteranopia separation **and** a marker shape following EN 16942 pump
 labelling (diesel square, petrol circle, gaseous diamond), rendered by `FuelMark`; direction of
