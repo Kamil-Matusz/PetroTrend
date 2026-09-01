@@ -1,0 +1,82 @@
+.shell {
+  display: flex;
+  flex-direction: column;
+  min-height: 100svh;
+}
+
+.shell__bar {
+  display: flex;
+  align-items: center;
+  gap: 24px;
+  flex-wrap: wrap;
+  padding: 16px clamp(16px, 4vw, 40px);
+  border-bottom: 1px solid var(--kerb);
+}
+
+.shell__brand {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  text-decoration: none;
+}
+
+.shell__wordmark {
+  font-family: var(--display);
+  font-weight: 700;
+  font-size: 22px;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+}
+
+.shell__wordmark em {
+  font-style: normal;
+  color: var(--sodium);
+}
+
+.shell__nav {
+  display: flex;
+  gap: 4px;
+  margin-left: auto;
+}
+
+.shell__link {
+  padding: 7px 14px;
+  border-bottom: 2px solid transparent;
+  color: var(--vapour);
+  font-family: var(--display);
+  font-weight: 600;
+  font-size: 15px;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  text-decoration: none;
+  transition: color 0.15s, border-color 0.15s;
+}
+
+.shell__link:hover {
+  color: var(--sign);
+}
+
+.shell__link--on {
+  color: var(--sign);
+  border-bottom-color: var(--sodium);
+}
+
+.shell__main {
+  flex: 1;
+  width: min(1180px, 100%);
+  margin: 0 auto;
+  padding: clamp(24px, 5vw, 48px) clamp(16px, 4vw, 40px) 64px;
+}
+
+.shell__foot {
+  display: flex;
+  justify-content: space-between;
+  gap: 16px;
+  flex-wrap: wrap;
+  padding: 16px clamp(16px, 4vw, 40px);
+  border-top: 1px solid var(--kerb);
+  font-size: 12px;
+  letter-spacing: 0.08em;
+  color: var(--dim);
+  text-transform: uppercase;
+}

@@ -1,0 +1,65 @@
+.dash {
+  display: flex;
+  flex-direction: column;
+  gap: 32px;
+}
+
+.dash__controls {
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: 20px;
+  flex-wrap: wrap;
+}
+
+.dash__window {
+  font-size: 13px;
+  color: var(--dim);
+  letter-spacing: 0.06em;
+  margin-top: 4px;
+}
+
+.dash__pickers {
+  display: flex;
+  align-items: flex-end;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+
+.dash__currency {
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+}
+
+.dash__currency select {
+  padding: 8px 10px;
+  border: 1px solid var(--kerb);
+  border-radius: var(--gauge);
+  background: var(--slab-2);
+  color: var(--sign);
+  font-family: var(--mono);
+  font-size: 14px;
+}
+
+.dash__panel {
+  overflow: hidden;
+}
+
+.dash__hint,
+.dash__more {
+  font-size: 13px;
+  color: var(--vapour);
+}
+
+.dash__more {
+  font-family: var(--display);
+  font-weight: 600;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  text-decoration: none;
+}
+
+.dash__more:hover {
+  color: var(--sodium);
+}

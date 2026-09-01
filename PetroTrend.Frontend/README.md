@@ -1,32 +1,53 @@
-# React + TypeScript + Vite
+# PetroTrend - frontend
 
-This template provides a minimal setup to get React working in Vite with HMR and some Oxlint rules.
+Interfejs do śledzenia cen paliw (ON, PB95, PB98, LPG), oparty o API z `PetroTrend.Backend`.
+React 19 + TypeScript + Vite, wykresy na `recharts`, routing na `react-router`.
 
-Currently, two official plugins are available:
+## Uruchomienie
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Oxc](https://oxc.rs)
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/)
-
-## React Compiler
-
-The React Compiler is not enabled on this template because of its impact on dev & build performances. To add it, see [this documentation](https://react.dev/learn/react-compiler/installation).
-
-## Expanding the Oxlint configuration
-
-If you are developing a production application, we recommend enabling type-aware lint rules by installing `oxlint-tsgolint` and editing `.oxlintrc.json`:
-
-```json
-{
-  "$schema": "./node_modules/oxlint/configuration_schema.json",
-  "plugins": ["react", "typescript", "oxc"],
-  "options": {
-    "typeAware": true
-  },
-  "rules": {
-    "react/rules-of-hooks": "error",
-    "react/only-export-components": ["warn", { "allowConstantExport": true }]
-  }
-}
+```bash
+npm install
+npm run dev        # http://localhost:5173
 ```
 
-See the [Oxlint rules documentation](https://oxc.rs/docs/guide/usage/linter/rules) for the full list of rules and categories.
+Dev server proxuje `/api` na `http://localhost:8080`, więc backend musi działać
+(`./gradlew bootRun` w `PetroTrend.Backend`, wymaga Dockera). Inny port backendu ustawisz
+zmienną `VITE_API_TARGET` - np. w pliku `.env.local`:
+
+```
+VITE_API_TARGET=http://localhost:8081
+```
+
+Poza proxy działa też CORS: backend przepuszcza `http://localhost:5173` i `:4173`
+(`config/WebConfig.java`).
+
+## Skrypty
+
+| Komenda | Co robi |
+|---|---|
+| `npm run dev` | serwer deweloperski z HMR |
+| `npm run build` | `tsc -b` + build produkcyjny do `dist/` |
+| `npm run preview` | podgląd builda na `:4173` |
+| `npm run lint` | oxlint |
+
+## Ekrany
+
+- **Pulpit** (`/`) - pylon z aktualnymi cenami i deltą, wykres trendu z przełącznikiem
+  zakresu i waluty, skrót ostatnich odczytów.
+- **Notowania** (`/notowania`) - `GET /search` z filtrami, sortowaniem po dacie i cenie oraz
+  paginacją; dodawanie, edycja i usuwanie odczytów.
+
+## Warstwa danych
+
+`src/api/` odwzorowuje kontrakt backendu: `client.ts` zamienia odpowiedzi błędów na `ApiError`
+z polem `reasonCode`, a `src/lib/errors.ts` mapuje te kody na komunikaty po polsku. Walidacja
+formularza w `PriceForm` powiela ograniczenia Jakarty z `FuelPriceRequest`, żeby niepoprawny
+payload nie trafiał do API.
+
+## Wygląd
+
+Motyw ciemny, bez trybu jasnego - całość jest stylizowana na przydrożny pylon cenowy stacji.
+Kolory paliw (`src/lib/fuel.ts`) to kodowanie z dystrybutorów, dobrane tak, by pary serii były
+rozróżnialne przy protanopii i deuteranopii; kształty znaczników idą za oznaczeniami EN 16942
+(diesel kwadrat, benzyna koło, gaz romb), więc identyfikacja serii nie opiera się na samym
+kolorze.

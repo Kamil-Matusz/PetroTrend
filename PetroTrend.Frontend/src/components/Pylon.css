@@ -1,0 +1,173 @@
+.pylon {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  position: relative;
+  padding-bottom: 56px;
+}
+
+/* The roadside board: a dark plate, lit from inside. */
+.pylon__plate {
+  width: min(560px, 100%);
+  border: 1px solid var(--kerb);
+  border-radius: var(--gauge);
+  background: linear-gradient(180deg, #0d131a, #0a0f14);
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.04),
+    0 0 0 6px rgba(255, 176, 32, 0.03),
+    0 26px 60px -30px rgba(255, 176, 32, 0.5);
+  position: relative;
+  z-index: 1;
+}
+
+.pylon__head {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 14px 20px;
+  border-bottom: 1px solid var(--kerb);
+}
+
+.pylon__date {
+  font-family: var(--mono);
+  font-size: 12px;
+  color: var(--dim);
+  text-align: right;
+}
+
+.pylon__rows {
+  list-style: none;
+  margin: 0;
+  padding: 6px 20px 12px;
+}
+
+.pylon__row {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  grid-template-areas:
+    'grade price'
+    'delta price';
+  align-items: center;
+  column-gap: 16px;
+  padding: 12px 0;
+  border-bottom: 1px solid var(--kerb-soft);
+}
+
+.pylon__row:last-child {
+  border-bottom: none;
+}
+
+.pylon__grade {
+  grid-area: grade;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  min-width: 0;
+}
+
+.pylon__symbol {
+  font-family: var(--display);
+  font-weight: 700;
+  font-size: 26px;
+  letter-spacing: 0.04em;
+}
+
+.pylon__name {
+  font-size: 13px;
+  color: var(--dim);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+/* Sodium-lit digits — the one place the accent is allowed to glow. */
+.pylon__price {
+  grid-area: price;
+  font-weight: 600;
+  font-size: clamp(34px, 8vw, 56px);
+  line-height: 1;
+  color: var(--sodium);
+  text-shadow: 0 0 22px rgba(255, 176, 32, 0.35);
+  letter-spacing: -0.02em;
+}
+
+.pylon__price--void {
+  color: #2a323a;
+  text-shadow: none;
+}
+
+.pylon__delta {
+  grid-area: delta;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 14px;
+  color: var(--vapour);
+}
+
+.pylon__delta--rise {
+  color: var(--rise);
+}
+
+.pylon__delta--fall {
+  color: var(--fall);
+}
+
+.pylon__delta--none {
+  color: var(--dim);
+  font-size: 13px;
+}
+
+.pylon__delta-sr {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip-path: inset(50%);
+}
+
+.pylon__foot {
+  display: flex;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 10px 20px;
+  border-top: 1px solid var(--kerb);
+  font-size: 12px;
+  color: var(--dim);
+  letter-spacing: 0.04em;
+}
+
+/* Mast and the light it throws on the forecourt. */
+.pylon__mast {
+  width: 26px;
+  height: 56px;
+  background: linear-gradient(90deg, #171f27, #232e38 40%, #232e38 60%, #131a21);
+  border-bottom-left-radius: 2px;
+  border-bottom-right-radius: 2px;
+}
+
+.pylon__pool {
+  position: absolute;
+  bottom: -18px;
+  width: min(520px, 90%);
+  height: 90px;
+  background: radial-gradient(ellipse at center, rgba(255, 176, 32, 0.13), transparent 70%);
+  filter: blur(6px);
+  pointer-events: none;
+}
+
+@media (max-width: 560px) {
+  .pylon__row {
+    grid-template-columns: 1fr;
+    grid-template-areas:
+      'grade'
+      'price'
+      'delta';
+    row-gap: 4px;
+  }
+
+  .pylon__name {
+    display: none;
+  }
+}

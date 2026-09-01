@@ -1,0 +1,35 @@
+.pform {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  padding: 18px;
+}
+
+.pform__grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 14px;
+}
+
+.pform__wide {
+  grid-column: 1 / -1;
+}
+
+.pform__note {
+  font-size: 13px;
+  color: var(--dim);
+  border-left: 2px solid var(--kerb);
+  padding-left: 10px;
+}
+
+.pform__actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 10px;
+}
+
+@media (max-width: 420px) {
+  .pform__grid {
+    grid-template-columns: 1fr;
+  }
+}

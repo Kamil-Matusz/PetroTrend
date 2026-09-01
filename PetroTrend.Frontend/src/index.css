@@ -1,111 +1,234 @@
 :root {
-  --text: #6b6375;
-  --text-h: #08060d;
-  --bg: #fff;
-  --border: #e5e4e7;
-  --code-bg: #f4f3ec;
-  --accent: #aa3bff;
-  --accent-bg: rgba(170, 59, 255, 0.1);
-  --accent-border: rgba(170, 59, 255, 0.5);
-  --social-bg: rgba(244, 243, 236, 0.5);
-  --shadow:
-    rgba(0, 0, 0, 0.1) 0 10px 15px -3px, rgba(0, 0, 0, 0.05) 0 4px 6px -2px;
+  /* Surfaces — the blue-black of a station canopy after dark. */
+  --night: #0b1015;
+  --slab: #141b22;
+  --slab-2: #19222b;
+  --kerb: #232e38;
+  --kerb-soft: #1c2630;
 
-  --sans: system-ui, 'Segoe UI', Roboto, sans-serif;
-  --heading: system-ui, 'Segoe UI', Roboto, sans-serif;
-  --mono: ui-monospace, Consolas, monospace;
+  /* Ink */
+  --sign: #e8eef2;
+  --vapour: #93a4b1;
+  --dim: #64757f;
 
-  font: 18px/145% var(--sans);
-  letter-spacing: 0.18px;
-  color-scheme: light dark;
-  color: var(--text);
-  background: var(--bg);
-  font-synthesis: none;
-  text-rendering: optimizeLegibility;
+  /* Sodium-vapour forecourt light — the single interactive accent. */
+  --sodium: #ffb020;
+  --sodium-dim: rgba(255, 176, 32, 0.14);
+
+  /* Fuel grades: pump-handle coding, re-stepped to clear CVD separation on --slab. */
+  --fuel-on: #d08000;
+  --fuel-pb95: #2fae63;
+  --fuel-pb98: #d83a45;
+  --fuel-lpg: #4a90f0;
+
+  /* Direction of change — paired with ▲ / ▼ so colour is never the only cue. */
+  --rise: #ff7a5c;
+  --fall: #4fd1a5;
+
+  --display: 'Barlow Condensed', 'Arial Narrow', system-ui, sans-serif;
+  --body: 'Barlow', system-ui, 'Segoe UI', sans-serif;
+  --mono: 'IBM Plex Mono', ui-monospace, Consolas, monospace;
+
+  --gauge: 3px;
+
+  color-scheme: dark;
+  font: 400 16px/1.5 var(--body);
+  color: var(--sign);
+  background: var(--night);
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
-
-  @media (max-width: 1024px) {
-    font-size: 16px;
-  }
 }
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --text: #9ca3af;
-    --text-h: #f3f4f6;
-    --bg: #16171d;
-    --border: #2e303a;
-    --code-bg: #1f2028;
-    --accent: #c084fc;
-    --accent-bg: rgba(192, 132, 252, 0.15);
-    --accent-border: rgba(192, 132, 252, 0.5);
-    --social-bg: rgba(47, 48, 58, 0.5);
-    --shadow:
-      rgba(0, 0, 0, 0.4) 0 10px 15px -3px, rgba(0, 0, 0, 0.25) 0 4px 6px -2px;
-  }
-
-  #social .button-icon {
-    filter: invert(1) brightness(2);
-  }
-}
-
-#root {
-  width: 1126px;
-  max-width: 100%;
-  margin: 0 auto;
-  text-align: center;
-  border-inline: 1px solid var(--border);
-  min-height: 100svh;
-  display: flex;
-  flex-direction: column;
+* {
   box-sizing: border-box;
 }
 
 body {
   margin: 0;
+  min-height: 100svh;
+  background:
+    radial-gradient(120% 60% at 50% -10%, rgba(255, 176, 32, 0.07), transparent 62%),
+    var(--night);
 }
 
 h1,
-h2 {
-  font-family: var(--heading);
-  font-weight: 500;
-  color: var(--text-h);
+h2,
+h3 {
+  font-family: var(--display);
+  font-weight: 700;
+  letter-spacing: 0.02em;
+  color: var(--sign);
+  margin: 0;
 }
 
 h1 {
-  font-size: 56px;
-  letter-spacing: -1.68px;
-  margin: 32px 0;
-  @media (max-width: 1024px) {
-    font-size: 36px;
-    margin: 20px 0;
-  }
+  font-size: clamp(28px, 4vw, 40px);
+  text-transform: uppercase;
 }
+
 h2 {
-  font-size: 24px;
-  line-height: 118%;
-  letter-spacing: -0.24px;
-  margin: 0 0 8px;
-  @media (max-width: 1024px) {
-    font-size: 20px;
-  }
+  font-size: 22px;
+  text-transform: uppercase;
 }
+
 p {
   margin: 0;
 }
 
-code,
-.counter {
-  font-family: var(--mono);
-  display: inline-flex;
-  border-radius: 4px;
-  color: var(--text-h);
+a {
+  color: inherit;
 }
 
-code {
+/* Every number on the page wears the mono face with tabular figures. */
+.num {
+  font-family: var(--mono);
+  font-variant-numeric: tabular-nums;
+  font-feature-settings: 'tnum' 1;
+}
+
+/* Section eyebrow — a stencilled label, the way equipment is marked. */
+.eyebrow {
+  font-family: var(--display);
+  font-weight: 600;
+  font-size: 14px;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  color: var(--vapour);
+}
+
+:focus-visible {
+  outline: 2px solid var(--sodium);
+  outline-offset: 2px;
+  border-radius: 2px;
+}
+
+/* Forecourt kerb marking — frames the page top and bottom, nothing else. */
+.hazard {
+  height: 4px;
+  flex: none;
+  background: repeating-linear-gradient(
+    -45deg,
+    var(--sodium) 0 8px,
+    var(--night) 8px 16px
+  );
+}
+
+button {
+  font: inherit;
+  cursor: pointer;
+}
+
+input,
+select {
+  font: inherit;
+}
+
+.btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 9px 16px;
+  border: 1px solid var(--kerb);
+  border-radius: var(--gauge);
+  background: var(--slab-2);
+  color: var(--sign);
+  font-family: var(--display);
+  font-weight: 600;
   font-size: 15px;
-  line-height: 135%;
-  padding: 4px 8px;
-  background: var(--code-bg);
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  text-decoration: none;
+  transition: border-color 0.15s, background 0.15s, color 0.15s;
+}
+
+.btn:hover {
+  border-color: var(--dim);
+}
+
+.btn--primary {
+  background: var(--sodium);
+  border-color: var(--sodium);
+  color: #17120a;
+}
+
+.btn--primary:hover {
+  background: #ffc24d;
+  border-color: #ffc24d;
+}
+
+.btn--danger:hover {
+  border-color: var(--fuel-pb98);
+  color: var(--rise);
+}
+
+.btn:disabled {
+  opacity: 0.45;
+  cursor: not-allowed;
+}
+
+.field {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.field > label {
+  font-family: var(--display);
+  font-weight: 600;
+  font-size: 13px;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--vapour);
+}
+
+.field input,
+.field select {
+  padding: 9px 10px;
+  border: 1px solid var(--kerb);
+  border-radius: var(--gauge);
+  background: var(--night);
+  color: var(--sign);
+  font-family: var(--mono);
+  font-size: 14px;
+}
+
+.field input:hover,
+.field select:hover {
+  border-color: var(--dim);
+}
+
+.field--invalid input,
+.field--invalid select {
+  border-color: var(--fuel-pb98);
+}
+
+.field__error {
+  font-size: 13px;
+  color: var(--rise);
+}
+
+/* Panels are plated, not floating — 1px kerb line, minimal radius. */
+.panel {
+  border: 1px solid var(--kerb);
+  border-radius: var(--gauge);
+  background: var(--slab);
+}
+
+.panel__head {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 16px;
+  flex-wrap: wrap;
+  padding: 16px 20px;
+  border-bottom: 1px solid var(--kerb);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.001ms !important;
+    transition-duration: 0.001ms !important;
+  }
 }

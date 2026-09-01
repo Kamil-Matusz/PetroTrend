@@ -1,0 +1,101 @@
+.ptable__scroll {
+  overflow-x: auto;
+}
+
+.ptable {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 15px;
+}
+
+.ptable th {
+  text-align: left;
+  padding: 10px 14px;
+  border-bottom: 1px solid var(--kerb);
+  font-family: var(--display);
+  font-weight: 600;
+  font-size: 13px;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--vapour);
+  white-space: nowrap;
+}
+
+.ptable__sort {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  border: none;
+  background: none;
+  padding: 0;
+  font: inherit;
+  letter-spacing: inherit;
+  text-transform: inherit;
+  color: inherit;
+}
+
+.ptable__sort:hover {
+  color: var(--sign);
+}
+
+.ptable__sort--on {
+  color: var(--sodium);
+}
+
+.ptable td {
+  padding: 11px 14px;
+  border-bottom: 1px solid var(--kerb-soft);
+  white-space: nowrap;
+}
+
+/* The grade colour rides the row edge, so the table reads like the chart. */
+.ptable tbody tr td:first-child {
+  border-left: 3px solid var(--grade);
+}
+
+.ptable tbody tr:hover td {
+  background: var(--slab-2);
+}
+
+.ptable__price {
+  color: var(--sign);
+  font-weight: 600;
+}
+
+.ptable__source,
+.ptable__stamp {
+  color: var(--vapour);
+  font-size: 13px;
+}
+
+.ptable__void {
+  color: var(--dim);
+}
+
+.ptable__actions-head,
+.ptable__actions {
+  text-align: right;
+}
+
+.ptable__action {
+  border: 1px solid transparent;
+  border-radius: 2px;
+  background: none;
+  color: var(--vapour);
+  padding: 4px 8px;
+  font-family: var(--display);
+  font-weight: 600;
+  font-size: 13px;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+}
+
+.ptable__action:hover {
+  border-color: var(--kerb);
+  color: var(--sign);
+}
+
+.ptable__action--danger:hover {
+  border-color: var(--fuel-pb98);
+  color: var(--rise);
+}

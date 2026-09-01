@@ -1,0 +1,35 @@
+.range {
+  display: inline-flex;
+  border: 1px solid var(--kerb);
+  border-radius: var(--gauge);
+  background: var(--slab-2);
+  overflow: hidden;
+}
+
+.range__tab {
+  border: none;
+  border-right: 1px solid var(--kerb);
+  background: transparent;
+  color: var(--vapour);
+  padding: 8px 14px;
+  font-family: var(--display);
+  font-weight: 600;
+  font-size: 14px;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  transition: color 0.15s, background 0.15s;
+}
+
+.range__tab:last-child {
+  border-right: none;
+}
+
+.range__tab:hover {
+  color: var(--sign);
+}
+
+/* Active range is marked the way a selector button lights up on a pump. */
+.range__tab--on {
+  background: var(--sodium-dim);
+  color: var(--sodium);
+}

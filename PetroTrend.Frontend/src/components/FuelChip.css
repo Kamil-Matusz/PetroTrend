@@ -1,0 +1,19 @@
+.fuel-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  white-space: nowrap;
+}
+
+.fuel-chip__symbol {
+  font-family: var(--display);
+  font-weight: 700;
+  font-size: 15px;
+  letter-spacing: 0.06em;
+  color: var(--sign);
+}
+
+.fuel-chip__name {
+  font-size: 13px;
+  color: var(--vapour);
+}

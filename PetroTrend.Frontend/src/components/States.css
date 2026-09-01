@@ -1,0 +1,74 @@
+.state {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+  padding: 48px 24px;
+  text-align: center;
+}
+
+.state__title {
+  font-family: var(--display);
+  font-weight: 700;
+  font-size: 20px;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+
+.state__text {
+  color: var(--vapour);
+  font-size: 15px;
+  max-width: 46ch;
+}
+
+.state--error .state__title {
+  color: var(--rise);
+}
+
+/* A dispenser counter ticking over while the request is in flight. */
+.state__pump {
+  width: 34px;
+  height: 10px;
+  border: 1px solid var(--kerb);
+  border-radius: 2px;
+  background:
+    repeating-linear-gradient(90deg, var(--sodium) 0 4px, transparent 4px 12px) 0 0 / 12px 100% repeat-x,
+    var(--night);
+  animation: pump-run 0.9s linear infinite;
+}
+
+@keyframes pump-run {
+  to {
+    background-position: 12px 0;
+  }
+}
+
+.banner {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 10px 14px;
+  border: 1px solid var(--fuel-pb98);
+  border-left-width: 3px;
+  border-radius: var(--gauge);
+  background: rgba(216, 58, 69, 0.1);
+}
+
+.banner__text {
+  flex: 1;
+  font-size: 15px;
+}
+
+.banner__close {
+  border: none;
+  background: none;
+  color: var(--vapour);
+  font-size: 22px;
+  line-height: 1;
+  padding: 0 4px;
+}
+
+.banner__close:hover {
+  color: var(--sign);
+}
