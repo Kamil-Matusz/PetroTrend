@@ -16,6 +16,8 @@ type Draft = {
 
 type Errors = Partial<Record<keyof Draft, string>>
 
+const DEFAULT_SOURCE = 'Valdi Rzeszów'
+
 type PriceFormProps = {
   initial?: FuelPriceResponse
   submitting: boolean
@@ -48,7 +50,7 @@ export function PriceForm({ initial, submitting, error, onSubmit, onCancel }: Pr
     currency: initial?.currency ?? 'PLN',
     price: initial ? String(initial.price) : '',
     date: initial?.date ?? todayIso(),
-    source: initial?.source ?? '',
+    source: initial?.source ?? DEFAULT_SOURCE,
   })
   const [errors, setErrors] = useState<Errors>({})
 
@@ -84,7 +86,7 @@ export function PriceForm({ initial, submitting, error, onSubmit, onCancel }: Pr
           >
             {FUEL_SYMBOLS.map((symbol) => (
               <option key={symbol} value={symbol}>
-                {symbol} — {FUEL_META[symbol].name}
+                {symbol} - {FUEL_META[symbol].name}
               </option>
             ))}
           </select>
@@ -123,7 +125,7 @@ export function PriceForm({ initial, submitting, error, onSubmit, onCancel }: Pr
           <label htmlFor="pf-source">Źródło (opcjonalnie)</label>
           <input
             id="pf-source"
-            placeholder="np. Orlen Puławska"
+            placeholder={DEFAULT_SOURCE}
             maxLength={64}
             value={draft.source}
             onChange={(e) => set('source', e.target.value)}
@@ -133,7 +135,7 @@ export function PriceForm({ initial, submitting, error, onSubmit, onCancel }: Pr
       </div>
 
       <p className="pform__note">
-        Jedno notowanie na paliwo, walutę i dzień — powtórzenie zostanie odrzucone przez API.
+        Jedno notowanie na paliwo, walutę i dzień - powtórzenie zostanie odrzucone przez API.
       </p>
 
       <div className="pform__actions">
