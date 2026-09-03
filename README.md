@@ -162,6 +162,48 @@ GitHub Actions (`.github/workflows/ci.yml`) runs two independent jobs on every p
 `main`: backend (`./gradlew build` on Temurin 21, test report uploaded as an artifact on failure)
 and frontend (`npm ci`, `npm run lint`, `npm run build` on Node 24).
 
+## Deployment
+
+The frontend deploys to Azure Static Web Apps from `.github/workflows/azure-static-web-apps-*.yml`
+- generated and committed to `main` by the Azure portal when the resource was linked to this repo,
+named after the app's default hostname, and independent of `ci.yml`. It is an ordinary file in the
+repo: Azure writes it once and never touches it again, so edit it freely.
+
+Azure's own Oryx builder installs and builds inside the deploy action's container
+(`app_location: ./PetroTrend.Frontend`, `output_location: dist` - `dist` because Vite, not the
+`build` that the portal's React preset suggests), so the deployed bundle is not the one `ci.yml`
+produced and a red `ci.yml` does not block a deploy. Oryx takes its Node version from
+`engines.node` in `package.json` - Vite 8 needs `>=22.12.0`, so that field is load-bearing rather
+than decorative, and a deploy failing on an unsupported Node version is fixed there (pin `22.x` if
+the range cannot be resolved).
+
+PRs to `main` get a preview environment of their own (the Free plan allows 3) with the URL
+commented on the PR; the generated `close_pull_request_job` tears it down when the PR closes.
+
+Two repository settings are required:
+
+| Kind | Name | Value |
+| --- | --- | --- |
+| Secret | `AZURE_STATIC_WEB_APPS_API_TOKEN_<APP>` | added automatically by the portal; also under *Manage deployment token* on the resource |
+| Variable | `VITE_API_BASE_URL` | absolute backend base, e.g. `https://<backend-host>/api` |
+
+The variable reaches the build only if the generated workflow forwards it - the portal does not do
+that. Add it to the `Build And Deploy` step by hand, as step `env:` rather than `with:`, because
+the deploy action is a Docker action and Oryx reads the container's environment:
+
+```yaml
+        env:
+          VITE_API_BASE_URL: ${{ vars.VITE_API_BASE_URL }}
+```
+
+The backend is not hosted anywhere yet. Because the two run on different origins there is no
+`/api` proxy in production: the frontend calls the absolute `VITE_API_BASE_URL` (inlined at build
+time by Vite), and the backend must allow the Static Web Apps origin through
+`petrotrend.cors.allowed-origins` - as an env var that is
+`PETROTREND_CORS_ALLOWED_ORIGINS=https://<swa-host>`. Client-side routes need
+`PetroTrend.Frontend/public/staticwebapp.config.json`; without its `navigationFallback` a deep
+link like `/records` returns 404.
+
 ## AI agent documentation
 
 Each subproject has its own `CLAUDE.md` (with an `AGENTS.md` pointing at it) covering rules,

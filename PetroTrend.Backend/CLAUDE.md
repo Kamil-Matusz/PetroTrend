@@ -42,6 +42,11 @@ Layering is strict and one-way: `controllers → services → repositories`, wit
 
 **Sorting is whitelisted.** `FuelPriceService.SORTABLE_PROPERTIES` (`date`, `price`) is validated against the incoming `Pageable`; anything else throws `InvalidSortPropertyException`. Add new sortable fields there, not just in the index. Page size is capped by `spring.data.web.pageable.max-page-size: 100`; `/search` defaults to `size=20, sort=date,desc`.
 
+**CORS.** `WebConfig` maps `/api/**` and takes its allowed origins from
+`petrotrend.cors.allowed-origins` (comma-separated, defaults to the two Vite dev ports). Deployed
+frontends on another origin are added there - as an env var, `PETROTREND_CORS_ALLOWED_ORIGINS` -
+never by hardcoding a host or widening the mapping.
+
 **Errors.** Every domain exception extends `BaseRuntimeException(message, reasonCode)` and carries a stable `reasonCode` constant (e.g. `FUEL_PRICE_NOT_FOUND`). `GlobalExceptionHandler` (`@RestControllerAdvice`) maps each to an HTTP status and funnels it through the static `RootController.handleException` into `ApiError`, which pulls `reasonCode` off the exception. A new domain error means: exception class + reason code + one handler method. Clients depend on `reasonCode`, so treat existing codes as API contract.
 
 **Persistence details.** `price` is `BigDecimal` stored as `DECIMAL128` (`@Field(targetType = ...)`) - never widen it to `double`. `createdAt` is set by `@CreatedDate`, enabled by `@EnableMongoAuditing` in `MongoConfig`, and ignored in all mappings. Dates are `LocalDate` (day granularity), audit timestamps are `Instant`.

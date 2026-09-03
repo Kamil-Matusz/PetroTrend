@@ -11,3 +11,7 @@ spring:
     web:
       pageable:
         max-page-size: 100
+
+petrotrend:
+  cors:
+    allowed-origins: http://localhost:5173,http://localhost:4173

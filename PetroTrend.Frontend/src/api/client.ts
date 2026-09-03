@@ -1,4 +1,7 @@
-const BASE = '/api'
+// Relative by default, so the Vite dev proxy handles it. Deployments where the frontend and the
+// backend sit on different origins set `VITE_API_BASE_URL` at build time - it is baked into the
+// bundle, so changing it means rebuilding.
+const BASE = ((import.meta.env.VITE_API_BASE_URL as string | undefined) || '/api').replace(/\/$/, '')
 
 /** Mirrors the backend `ApiError`; `reasonCode` is the stable part of the contract. */
 export class ApiError extends Error {
@@ -25,7 +28,7 @@ async function readError(response: Response): Promise<ApiError> {
   try {
     body = (await response.json()) as ErrorBody
   } catch {
-    // Empty or non-JSON body — fall through to the status-only message.
+    // Empty or non-JSON body - fall through to the status-only message.
   }
 
   // Bean Validation failures bypass GlobalExceptionHandler and arrive in Spring's own shape.

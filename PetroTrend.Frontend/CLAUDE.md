@@ -25,9 +25,12 @@ whole gate. Don't claim a change is verified on tests that don't exist.
 
 `npm run dev` proxies `/api` to `http://localhost:8080` (`vite.config.ts`), so the backend must
 be running (`./gradlew bootRun` in `PetroTrend.Backend`, needs Docker). Override with
-`VITE_API_TARGET` in `.env.local`. The backend also allows CORS from `:5173` and `:4173`
-(`config/WebConfig.java`), so a direct-origin setup works too - but `client.ts` hardcodes the
-relative base `/api`, so the proxy is the supported path.
+`VITE_API_TARGET` in `.env.local`. The backend allows CORS from `:5173` and `:4173`
+(`config/WebConfig.java`, overridable with `petrotrend.cors.allowed-origins`), so a
+different-origin setup works too: `VITE_API_BASE_URL` overrides `client.ts`'s relative `/api`
+with an absolute base (e.g. `https://api.example.com/api`). Vite inlines it at build time, so it
+is a build input rather than a runtime setting - changing it means rebuilding. That is how the
+Azure Static Web Apps deploy reaches the backend; locally the proxy stays the simpler path.
 
 ## The backend contract is mirrored in three places
 
