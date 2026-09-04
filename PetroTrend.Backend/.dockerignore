@@ -1,0 +1,12 @@
+.gradle
+build/
+.idea
+.vscode
+bin/
+out/
+*.iml
+compose.yaml
+gradlew.bat
+CLAUDE.md
+AGENTS.md
+HELP.md
