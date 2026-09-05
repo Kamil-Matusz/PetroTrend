@@ -1,0 +1,54 @@
+.lost {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 16px;
+  padding: 56px 24px;
+  text-align: center;
+}
+
+/* An out-of-service pylon panel - the digits are dark, not lit. */
+.lost__board {
+  display: flex;
+  align-items: baseline;
+  gap: 12px;
+  padding: 18px 26px;
+  background: var(--night);
+  border-color: var(--kerb);
+}
+
+.lost__digits {
+  font-size: clamp(52px, 12vw, 88px);
+  line-height: 1;
+  font-weight: 600;
+  color: var(--dim);
+  letter-spacing: 0.04em;
+}
+
+.lost__unit {
+  font-family: var(--display);
+  font-weight: 600;
+  font-size: 14px;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  color: var(--dim);
+}
+
+.lost__text {
+  color: var(--vapour);
+  max-width: 48ch;
+}
+
+.lost__text code {
+  color: var(--sign);
+  font-size: 14px;
+  word-break: break-all;
+}
+
+.lost__actions {
+  display: flex;
+  gap: 12px;
+  flex-wrap: wrap;
+  justify-content: center;
+  margin-top: 8px;
+}
