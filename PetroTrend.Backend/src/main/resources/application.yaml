@@ -4,9 +4,10 @@ application:
 spring:
   application:
     name: PetroTrend
+  mongodb:
+    database: petrotrend
   data:
     mongodb:
-      database: petrotrend
       auto-index-creation: true
     web:
       pageable:
