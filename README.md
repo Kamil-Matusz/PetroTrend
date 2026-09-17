@@ -193,8 +193,13 @@ because the deploy action is a Docker action and Oryx reads the container's envi
 
 ```yaml
         env:
-          VITE_API_BASE_URL: ${{ vars.VITE_API_BASE_URL }}
+          VITE_API_BASE_URL: ${{ vars.VITE_API_BASE_URL || secrets.VITE_API_BASE_URL }}
 ```
+
+`vars.*` and `secrets.*` are separate lists behind one *Secrets and variables* page, and a name
+present in the wrong tab expands to an empty string with nothing said about it in the log - hence
+the fallback. A backend base URL belongs in *Variables*: Vite inlines it into the bundle either
+way, and a secret only masks it in build logs.
 
 The backend runs on Azure Container Apps (`petrotrend-backend`, resource group `PetroTrend`, Poland
 Central) from the `awahir/petrotrend-backend` image that `ci.yml` pushes to Docker Hub, against an
