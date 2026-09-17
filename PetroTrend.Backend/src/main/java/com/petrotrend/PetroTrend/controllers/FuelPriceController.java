@@ -1,5 +1,7 @@
 package com.petrotrend.PetroTrend.controllers;
 
+import com.petrotrend.PetroTrend.dto.FuelPriceBatchRequest;
+import com.petrotrend.PetroTrend.dto.FuelPriceBatchResponse;
 import com.petrotrend.PetroTrend.dto.FuelPriceFilter;
 import com.petrotrend.PetroTrend.dto.FuelPriceRequest;
 import com.petrotrend.PetroTrend.dto.FuelPriceResponse;
@@ -76,6 +78,11 @@ public class FuelPriceController {
     @ResponseStatus(HttpStatus.CREATED)
     public FuelPriceResponse createFuelPrice(@Valid @RequestBody final FuelPriceRequest request) {
         return fuelPriceService.create(request);
+    }
+
+    @PostMapping("/batch")
+    public FuelPriceBatchResponse createFuelPrices(@Valid @RequestBody final FuelPriceBatchRequest request) {
+        return fuelPriceService.createBatch(request);
     }
 
     @PutMapping("/{id}")

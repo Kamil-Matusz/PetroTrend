@@ -84,8 +84,10 @@ Base prefix: `/api/fuelPrices`.
 | `GET` | `/search` | server-side filtering, sorting and pagination |
 | `GET` | `/{id}` | a single reading |
 | `POST` | `/` | create a reading (`201`) |
+| `POST` | `/batch` | create several readings at once (`200`), overwriting any already held for that fuel, currency and day |
 | `PUT` | `/{id}` | update a reading |
 | `DELETE` | `/{id}` | delete a reading (`204`) |
+| `DELETE` | `/range?from=&to=` | delete every reading in a date window (`204`) |
 
 `/search` accepts the `fuelSymbol`, `currency`, `from` and `to` filters plus the standard
 `Pageable` parameters (`page`, `size`, `sort`). It defaults to `size=20`, `sort=date,desc`; page

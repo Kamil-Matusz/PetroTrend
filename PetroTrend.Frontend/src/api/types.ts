@@ -22,6 +22,15 @@ export type FuelPriceRequest = {
   source?: string | null
 }
 
+export type FuelPriceBatchRequest = {
+  prices: FuelPriceRequest[]
+}
+
+export type FuelPriceBatchResponse = {
+  created: FuelPriceResponse[]
+  updated: FuelPriceResponse[]
+}
+
 export type FuelPriceFilter = {
   fuelSymbol?: FuelSymbol | null
   currency?: Currency | null
@@ -39,7 +48,7 @@ export type PageRequest = {
   direction: SortDirection
 }
 
-/** Spring `PagedModel` — content plus a nested page descriptor. */
+/** Spring `PagedModel` - content plus a nested page descriptor. */
 export type PagedModel<T> = {
   content: T[]
   page: {

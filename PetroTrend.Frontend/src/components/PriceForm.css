@@ -15,6 +15,95 @@
   grid-column: 1 / -1;
 }
 
+.pform__fuels {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  margin: 0;
+  padding: 14px;
+  border: 1px solid var(--kerb);
+  border-radius: var(--gauge);
+  background: var(--night);
+}
+
+.pform__fuels--invalid {
+  border-color: var(--fuel-pb98);
+}
+
+.pform__fuels > legend {
+  padding: 0 6px;
+  font-family: var(--display);
+  font-weight: 600;
+  font-size: 13px;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--vapour);
+}
+
+.pform__fuel {
+  display: grid;
+  grid-template-columns: 1fr 160px;
+  align-items: center;
+  gap: 6px 12px;
+}
+
+.pform__fuel-name {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  cursor: pointer;
+}
+
+.pform__fuel-symbol {
+  font-family: var(--display);
+  font-weight: 700;
+  font-size: 15px;
+  letter-spacing: 0.06em;
+  color: var(--sign);
+}
+
+.pform__fuel-full {
+  font-size: 13px;
+  color: var(--vapour);
+}
+
+.pform__fuel-entry {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.pform__fuel-entry input {
+  width: 100%;
+  padding: 9px 10px;
+  border: 1px solid var(--kerb);
+  border-radius: var(--gauge);
+  background: var(--slab);
+  color: var(--sign);
+  font-family: var(--mono);
+  font-size: 14px;
+  text-align: right;
+}
+
+.pform__fuel-entry input:hover {
+  border-color: var(--dim);
+}
+
+.pform__fuel--invalid .pform__fuel-entry input {
+  border-color: var(--fuel-pb98);
+}
+
+.pform__fuel-unit {
+  font-family: var(--mono);
+  font-size: 13px;
+  color: var(--dim);
+  white-space: nowrap;
+}
+
+.pform__fuel-error {
+  grid-column: 1 / -1;
+}
+
 .pform__note {
   font-size: 13px;
   color: var(--dim);
@@ -31,5 +120,9 @@
 @media (max-width: 420px) {
   .pform__grid {
     grid-template-columns: 1fr;
+  }
+
+  .pform__fuel {
+    grid-template-columns: 1fr 120px;
   }
 }

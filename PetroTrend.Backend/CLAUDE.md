@@ -9,11 +9,11 @@ PetroTrend backend - a fuel price tracking REST API. Spring Boot 4.1.1 on Java 2
 ## Commands
 
 ```bash
-./gradlew build                 # compile + test
-./gradlew test                  # all tests
+./gradlew build                                                           # compile + test
+./gradlew test                                                            # all tests
 ./gradlew test --tests 'FuelPriceServiceTest'                             # single class
 ./gradlew test --tests 'FuelPriceServiceTest.currentMonthQueriesFirstAndLastDayOfCurrentMonth'   # single test
-./gradlew bootRun               # run app (auto-starts MongoDB via compose.yaml)
+./gradlew bootRun                                                         # run app (auto-starts MongoDB via compose.yaml)
 ```
 
 There is no linter configured - `build` (with `-Amapstruct.unmappedTargetPolicy=ERROR`) is the gate.
@@ -25,7 +25,7 @@ Docker must be running for both `bootRun` and `test`:
 
 ## API surface
 
-`/api/fuelPrices` - `GET` (all), `GET /latest?fuelSymbols=` (defaults to `ON,PB95`), `GET /currentMonth`, `GET /range?from=&to=`, `GET /search`, `GET /{id}`, `POST`, `PUT /{id}`, `DELETE /{id}`, `DELETE /range?from=&to=` (bulk, 204).
+`/api/fuelPrices` - `GET` (all), `GET /latest?fuelSymbols=` (defaults to `ON,PB95`), `GET /currentMonth`, `GET /range?from=&to=`, `GET /search`, `GET /{id}`, `POST`, `POST /batch` (several fuels at once, 200), `PUT /{id}`, `DELETE /{id}`, `DELETE /range?from=&to=` (bulk, 204).
 OpenAPI JSON at `/v3/api-docs`, Scalar UI at `/scalar`. Actuator is on the classpath.
 
 ## Architecture
@@ -38,7 +38,9 @@ Layering is strict and one-way: `controllers → services → repositories`, wit
 - Simple date-window reads use a declarative `@Query` on `FuelPriceRepository`.
 - `search` is a Spring Data custom fragment: `FuelPriceRepositoryCustom` + package-private `FuelPriceRepositoryImpl`, composed into `FuelPriceRepository` by inheritance. The `Impl` suffix and matching base name are what let Spring Data find it - renaming either breaks wiring silently. It builds `Criteria` per non-null filter field and pages with `PageableExecutionUtils` so the count query only runs when needed.
 
-**Uniqueness.** Enforced by the `@CompoundIndex` on `(fuelSymbol, currency, date desc)` in `FuelPrice`, created at startup by `spring.data.mongodb.auto-index-creation: true`. There is no pre-read check - `FuelPriceService.save` catches `DuplicateKeyException` and rethrows `FuelPriceAlreadyExistsException`. Keep that pattern rather than adding an `existsBy` lookup.
+**Uniqueness.** Enforced by the `@CompoundIndex` on `(fuelSymbol, currency, date desc)` in `FuelPrice`, created at startup by `spring.data.mongodb.auto-index-creation: true`. On the single-item `POST` there is no pre-read check - `FuelPriceService.save` catches `DuplicateKeyException` and rethrows `FuelPriceAlreadyExistsException`. Keep that pattern rather than adding an `existsBy` lookup.
+
+**`POST /batch` is the one exception, and it upserts.** The two endpoints deliberately disagree: a batch entry whose (fuel, currency, day) already exists **overwrites** that reading instead of answering `409`, so a whole pylon can be re-entered after a typo. That needs the only pre-read in the codebase - `findByFuelSymbolAndCurrencyAndDate`, served by the same unique index - because Mongo is not transactional here and a half-written batch would be worse. The overwrite goes through `FuelPriceMapper.convertToEntity` on the loaded document, so `id` and `createdAt` survive. `FuelPriceBatchResponse` keeps `created` and `updated` apart precisely so an overwrite is never silent, and `FuelPriceValidator.validateNoDuplicates` rejects a payload that repeats a key (`DUPLICATE_FUEL_PRICE_IN_BATCH`, 400) - otherwise the last entry would quietly win. The `save` catch still stands for the read-then-write race.
 
 **Sorting is whitelisted.** `FuelPriceValidator.SORTABLE_PROPERTIES` (`date`, `price`) is validated against the incoming `Pageable`; anything else throws `InvalidSortPropertyException`. Add new sortable fields there, not just in the index. Page size is capped by `spring.data.web.pageable.max-page-size: 100`; `/search` defaults to `size=20, sort=date,desc`.
 

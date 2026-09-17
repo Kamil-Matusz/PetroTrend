@@ -1,5 +1,7 @@
 package com.petrotrend.PetroTrend.controllers;
 
+import com.petrotrend.PetroTrend.dto.FuelPriceBatchRequest;
+import com.petrotrend.PetroTrend.dto.FuelPriceBatchResponse;
 import com.petrotrend.PetroTrend.dto.FuelPriceFilter;
 import com.petrotrend.PetroTrend.dto.FuelPriceResponse;
 import com.petrotrend.PetroTrend.enums.Currency;
@@ -8,12 +10,14 @@ import com.petrotrend.PetroTrend.exceptions.InvalidDateRangeException;
 import com.petrotrend.PetroTrend.exceptions.InvalidSortPropertyException;
 import com.petrotrend.PetroTrend.services.FuelPriceService;
 import org.junit.jupiter.api.Test;
+import org.mockito.ArgumentCaptor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.webmvc.test.autoconfigure.WebMvcTest;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
+import org.springframework.http.MediaType;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.MockMvc;
 
@@ -30,6 +34,7 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
@@ -42,6 +47,7 @@ class FuelPriceControllerTest {
     private static final String CURRENT_MONTH_PATH = BASE_PATH + "/currentMonth";
     private static final String RANGE_PATH = BASE_PATH + "/range";
     private static final String LATEST_PATH = BASE_PATH + "/latest";
+    private static final String BATCH_PATH = BASE_PATH + "/batch";
 
     private static final FuelPriceFilter EMPTY_FILTER = new FuelPriceFilter(null, null, null, null);
 
@@ -110,8 +116,7 @@ class FuelPriceControllerTest {
         when(fuelPriceService.search(any(), any())).thenReturn(new PageImpl<>(List.of(response), PageRequest.of(1, 5), 42));
 
         //when
-        final String body = mockMvc.perform(
-                        get(SEARCH_PATH).param("page", "1").param("size", "5"))
+        final String body = mockMvc.perform(get(SEARCH_PATH).param("page", "1").param("size", "5"))
                 //then
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.content[0].id").value("id-1"))
@@ -256,5 +261,59 @@ class FuelPriceControllerTest {
                 //then
                 .andExpect(status().isNoContent());
         verify(fuelPriceService, never()).delete(any());
+    }
+
+    @Test
+    void createBatchReturnsCreatedAndUpdatedLists() throws Exception {
+        //given
+        final FuelPriceResponse diesel = response(FuelSymbol.ON, new BigDecimal("6.42"));
+        final FuelPriceResponse petrol = response(FuelSymbol.PB95, new BigDecimal("5.89"));
+        final ArgumentCaptor<FuelPriceBatchRequest> batchCaptor = ArgumentCaptor.forClass(FuelPriceBatchRequest.class);
+        when(fuelPriceService.createBatch(any()))
+                .thenReturn(new FuelPriceBatchResponse(List.of(petrol), List.of(diesel)));
+
+        //when
+        mockMvc.perform(post(BATCH_PATH).contentType(MediaType.APPLICATION_JSON).content("""
+                        {"prices": [
+                          {"fuelSymbol": "ON", "currency": "PLN", "price": 6.42, "date": "2026-09-17"},
+                          {"fuelSymbol": "PB95", "currency": "PLN", "price": 5.89, "date": "2026-09-17"}
+                        ]}"""))
+                //then
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.created[0].fuelSymbol").value("PB95"))
+                .andExpect(jsonPath("$.updated[0].fuelSymbol").value("ON"));
+        verify(fuelPriceService).createBatch(batchCaptor.capture());
+        assertThat(batchCaptor.getValue().prices()).hasSize(2);
+    }
+
+    @Test
+    void createBatchRejectsEmptyPriceList() throws Exception {
+        //given
+
+        //when
+        mockMvc.perform(post(BATCH_PATH).contentType(MediaType.APPLICATION_JSON).content("""
+                        {"prices": []}"""))
+                //then
+                .andExpect(status().isBadRequest());
+        verify(fuelPriceService, never()).createBatch(any());
+    }
+
+    @Test
+    void createBatchRejectsEntryWithNegativePrice() throws Exception {
+        //given
+
+        //when
+        mockMvc.perform(post(BATCH_PATH).contentType(MediaType.APPLICATION_JSON).content("""
+                        {"prices": [
+                          {"fuelSymbol": "ON", "currency": "PLN", "price": -1, "date": "2026-09-17"}
+                        ]}"""))
+                //then
+                .andExpect(status().isBadRequest());
+        verify(fuelPriceService, never()).createBatch(any());
+    }
+
+    private static FuelPriceResponse response(final FuelSymbol fuelSymbol, final BigDecimal price) {
+        return new FuelPriceResponse("id-" + fuelSymbol, fuelSymbol, Currency.PLN, price,
+                                     LocalDate.of(2026, 9, 17), "Valdi Rzeszów", null);
     }
 }

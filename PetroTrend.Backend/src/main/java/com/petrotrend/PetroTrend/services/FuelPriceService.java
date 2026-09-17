@@ -1,5 +1,7 @@
 package com.petrotrend.PetroTrend.services;
 
+import com.petrotrend.PetroTrend.dto.FuelPriceBatchRequest;
+import com.petrotrend.PetroTrend.dto.FuelPriceBatchResponse;
 import com.petrotrend.PetroTrend.dto.FuelPriceFilter;
 import com.petrotrend.PetroTrend.dto.FuelPriceRequest;
 import com.petrotrend.PetroTrend.dto.FuelPriceResponse;
@@ -18,6 +20,7 @@ import org.springframework.stereotype.Service;
 
 import java.time.LocalDate;
 import java.time.YearMonth;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
 
@@ -62,6 +65,24 @@ public class FuelPriceService {
         return fuelPriceMapper.convertToResponse(save(fuelPrice, request));
     }
 
+    /**
+     * Unlike {@link #create}, a batch overwrites the reading already held for a fuel, currency and
+     * day instead of rejecting it - the response keeps both outcomes apart so nothing is silent.
+     */
+    public FuelPriceBatchResponse createBatch(final FuelPriceBatchRequest request) {
+        FuelPriceValidator.validateNoDuplicates(request.prices());
+
+        final List<FuelPriceResponse> created = new ArrayList<>();
+        final List<FuelPriceResponse> updated = new ArrayList<>();
+        for (final FuelPriceRequest price : request.prices()) {
+            fuelPriceRepository
+                    .findByFuelSymbolAndCurrencyAndDate(price.fuelSymbol(), price.currency(), price.date())
+                    .ifPresentOrElse(existing -> updated.add(overwrite(existing, price)),
+                                     () -> created.add(create(price)));
+        }
+        return new FuelPriceBatchResponse(created, updated);
+    }
+
     public FuelPriceResponse update(final String id, final FuelPriceRequest request) {
         final FuelPrice fuelPrice = getOrThrow(id);
         fuelPriceMapper.convertToEntity(request, fuelPrice);
@@ -75,6 +96,11 @@ public class FuelPriceService {
     public void deleteByDateRange(final LocalDate from, final LocalDate to) {
         FuelPriceValidator.validateDateRange(from, to);
         fuelPriceRepository.deleteInDateRange(from, to);
+    }
+
+    private FuelPriceResponse overwrite(final FuelPrice existing, final FuelPriceRequest request) {
+        fuelPriceMapper.convertToEntity(request, existing);
+        return fuelPriceMapper.convertToResponse(save(existing, request));
     }
 
     private FuelPrice getOrThrow(final String id) {

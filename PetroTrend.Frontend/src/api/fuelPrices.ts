@@ -1,5 +1,7 @@
 import { request } from './client'
 import type {
+  FuelPriceBatchRequest,
+  FuelPriceBatchResponse,
   FuelPriceFilter,
   FuelPriceRequest,
   FuelPriceResponse,
@@ -52,6 +54,11 @@ export function findById(id: string): Promise<FuelPriceResponse> {
 
 export function create(body: FuelPriceRequest): Promise<FuelPriceResponse> {
   return request('/fuelPrices', { method: 'POST', body: JSON.stringify(body) })
+}
+
+/** One request for several fuels. A reading already held for that fuel, currency and day is overwritten. */
+export function createBatch(body: FuelPriceBatchRequest): Promise<FuelPriceBatchResponse> {
+  return request('/fuelPrices/batch', { method: 'POST', body: JSON.stringify(body) })
 }
 
 export function update(id: string, body: FuelPriceRequest): Promise<FuelPriceResponse> {

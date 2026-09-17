@@ -1,7 +1,8 @@
 import { useState } from 'react'
-import { create, remove, search, update } from '../api/fuelPrices'
+import { createBatch, remove, search, update } from '../api/fuelPrices'
 import type {
   Currency,
+  FuelPriceBatchRequest,
   FuelPriceRequest,
   FuelPriceResponse,
   FuelSymbol,
@@ -27,6 +28,8 @@ type Dialog =
   | { mode: 'delete'; row: FuelPriceResponse }
   | { mode: 'purge' }
 
+type Notice = { kind: 'purged'; count: number } | { kind: 'saved'; created: number; updated: number }
+
 export function RecordsPage() {
   const [fuelSymbol, setFuelSymbol] = useState<FuelSymbol | ''>('')
   const [currency, setCurrency] = useState<Currency | ''>('')
@@ -40,7 +43,7 @@ export function RecordsPage() {
   const [dialog, setDialog] = useState<Dialog | null>(null)
   const [saving, setSaving] = useState(false)
   const [saveError, setSaveError] = useState<unknown>(null)
-  const [purged, setPurged] = useState<number | null>(null)
+  const [notice, setNotice] = useState<Notice | null>(null)
 
   const { data, loading, error, reload } = useAsync(
     () =>
@@ -77,14 +80,29 @@ export function RecordsPage() {
     setSaveError(null)
   }
 
-  const submit = async (request: FuelPriceRequest) => {
-    if (dialog?.mode !== 'create' && dialog?.mode !== 'edit') return
+  const submitEdit = async (request: FuelPriceRequest) => {
+    if (dialog?.mode !== 'edit') return
     setSaving(true)
     setSaveError(null)
     try {
-      if (dialog.mode === 'edit') await update(dialog.row.id, request)
-      else await create(request)
+      await update(dialog.row.id, request)
       closeDialog()
+      reload()
+    } catch (cause) {
+      setSaveError(cause)
+    } finally {
+      setSaving(false)
+    }
+  }
+
+  const submitBatch = async (request: FuelPriceBatchRequest) => {
+    setSaving(true)
+    setSaveError(null)
+    try {
+      const result = await createBatch(request)
+      closeDialog()
+      setNotice({ kind: 'saved', created: result.created.length, updated: result.updated.length })
+      setPage(0)
       reload()
     } catch (cause) {
       setSaveError(cause)
@@ -110,7 +128,7 @@ export function RecordsPage() {
 
   const onPurged = (deleted: number) => {
     closeDialog()
-    setPurged(deleted)
+    setNotice({ kind: 'purged', count: deleted })
     setPage(0)
     reload()
   }
@@ -129,15 +147,34 @@ export function RecordsPage() {
             Wyczyść okres
           </button>
           <button type="button" className="btn btn--primary" onClick={() => setDialog({ mode: 'create' })}>
-            Dodaj odczyt
+            Dodaj odczyty
           </button>
         </div>
       </div>
 
-      {purged != null && (
+      {notice != null && (
         <p className="recs__notice" role="status">
-          Usunięto <span className="num">{purged}</span> {pluralRecords(purged)} z wybranego okresu.
-          <button type="button" className="recs__notice-close" onClick={() => setPurged(null)} aria-label="Zamknij komunikat">
+          {notice.kind === 'purged' ? (
+            <>
+              Usunięto <span className="num">{notice.count}</span> {pluralRecords(notice.count)} z wybranego okresu.
+            </>
+          ) : (
+            <>
+              {notice.created > 0 && (
+                <>
+                  Dodano <span className="num">{notice.created}</span> {pluralRecords(notice.created)}
+                  {notice.updated > 0 ? ', ' : '.'}
+                </>
+              )}
+              {notice.updated > 0 && (
+                <>
+                  {notice.created > 0 ? 'nadpisano' : 'Nadpisano'} <span className="num">{notice.updated}</span>{' '}
+                  {pluralRecords(notice.updated)}.
+                </>
+              )}
+            </>
+          )}
+          <button type="button" className="recs__notice-close" onClick={() => setNotice(null)} aria-label="Zamknij komunikat">
             ×
           </button>
         </p>
@@ -250,7 +287,7 @@ export function RecordsPage() {
                 </button>
               ) : (
                 <button type="button" className="btn btn--primary" onClick={() => setDialog({ mode: 'create' })}>
-                  Dodaj odczyt
+                  Dodaj odczyty
                 </button>
               )
             }
@@ -291,8 +328,8 @@ export function RecordsPage() {
       </section>
 
       {dialog?.mode === 'create' && (
-        <Modal title="Nowy odczyt" onClose={closeDialog}>
-          <PriceForm submitting={saving} error={saveError} onSubmit={submit} onCancel={closeDialog} />
+        <Modal title="Nowe odczyty" onClose={closeDialog}>
+          <PriceForm submitting={saving} error={saveError} onSubmit={submitBatch} onCancel={closeDialog} />
         </Modal>
       )}
 
@@ -302,7 +339,7 @@ export function RecordsPage() {
             initial={dialog.row}
             submitting={saving}
             error={saveError}
-            onSubmit={submit}
+            onSubmit={submitEdit}
             onCancel={closeDialog}
           />
         </Modal>

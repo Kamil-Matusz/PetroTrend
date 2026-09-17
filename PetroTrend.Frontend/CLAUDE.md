@@ -37,16 +37,17 @@ Azure Static Web Apps deploy reaches the backend; locally the proxy stays the si
 Changing a backend DTO, reason code or validation rule means updating all of these by hand -
 nothing is generated, and nothing fails at build time if they drift:
 
-- `src/api/types.ts` - `FuelPriceRequest`/`Response`/`Filter`, the `FUEL_SYMBOLS` / `CURRENCIES`
+- `src/api/types.ts` - `FuelPriceRequest`/`Response`/`Filter`/`BatchRequest`/`BatchResponse`, the `FUEL_SYMBOLS` / `CURRENCIES`
   literal unions, and `PagedModel<T>` (Spring's `content` + nested `page` descriptor).
   `SortProperty` is `'date' | 'price'` because the backend whitelists exactly those in
   `FuelPriceService.SORTABLE_PROPERTIES`; anything else comes back as `INVALID_SORT_PROPERTY`.
 - `src/lib/errors.ts` - maps backend `reasonCode` constants to Polish messages. Reason codes are
   the stable contract; a new backend domain error needs an entry here or the raw English message
   leaks to the user.
-- `PriceForm.validate` (`src/components/PriceForm.tsx`) - duplicates the Jakarta constraints on
-  `FuelPriceRequest` (positive, < 10000, 2 decimals, no future date, source ≤ 64 chars) so bad
-  payloads never leave the browser. Server-side validation still runs; this is a UX layer.
+- `PriceForm.validatePrice` / `validate` (`src/components/PriceForm.tsx`) - duplicate the Jakarta
+  constraints on `FuelPriceRequest` (positive, < 10000, 2 decimals, no future date, source ≤ 64
+  chars) so bad payloads never leave the browser. Server-side validation still runs; this is a UX
+  layer. `validatePrice` is per-price and shared by both form modes - keep it the single mirror.
 
 ## Data layer
 
@@ -85,6 +86,16 @@ write rather than mutating any cache. There is no cache, no dedupe, no shared st
   currency and answers `204` with no count - so it keeps its own dates, separate from the table
   filters, and reads the range back with `GET /fuelPrices/range` first: that preview is both the
   confirmation step and the only honest source for the "usunięto N" notice.
+
+  `PriceForm` serves both the create and the edit dialog and its two modes differ by more than
+  layout. **Create** shares one date, currency and source across a price field per `FUEL_SYMBOLS`
+  entry - a blank field is skipped - and posts the lot to `POST /fuelPrices/batch`, which
+  *overwrites* a reading already held for that fuel, currency and day. **Edit** keeps the single
+  fuel select and one price, and still goes through `PUT /{id}`, where a duplicate is a `409`.
+  The `onSubmit` prop is a union discriminated by `initial`, so each mode gets its own payload
+  type; narrowing has to happen on `props.initial`, not on a destructured copy. The `Notice`
+  union drives one shared status line for both the purge count and the "dodano N, nadpisano M"
+  result - `updated` is surfaced because an overwrite must never be silent.
 
 Filter and pagination state lives in `useState` on the page, not in the URL - deep links to a
 filtered view don't work today.

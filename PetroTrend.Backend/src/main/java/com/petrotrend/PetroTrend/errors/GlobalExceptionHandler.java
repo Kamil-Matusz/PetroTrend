@@ -1,6 +1,7 @@
 package com.petrotrend.PetroTrend.errors;
 
 import com.petrotrend.PetroTrend.controllers.RootController;
+import com.petrotrend.PetroTrend.exceptions.DuplicateFuelPriceInBatchException;
 import com.petrotrend.PetroTrend.exceptions.FuelPriceAlreadyExistsException;
 import com.petrotrend.PetroTrend.exceptions.FuelPriceNotFoundException;
 import com.petrotrend.PetroTrend.exceptions.InvalidDateRangeException;
@@ -25,6 +26,11 @@ public class GlobalExceptionHandler {
 
     @ExceptionHandler(InvalidSortPropertyException.class)
     public ResponseEntity<ApiError> handleInvalidSortPropertyException(final InvalidSortPropertyException e) {
+        return RootController.handleException(new ApiError(HttpStatus.BAD_REQUEST, e));
+    }
+
+    @ExceptionHandler(DuplicateFuelPriceInBatchException.class)
+    public ResponseEntity<ApiError> handleDuplicateFuelPriceInBatchException(final DuplicateFuelPriceInBatchException e) {
         return RootController.handleException(new ApiError(HttpStatus.BAD_REQUEST, e));
     }
 
