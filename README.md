@@ -188,21 +188,25 @@ Two repository settings are required:
 | Variable | `VITE_API_BASE_URL` | absolute backend base, e.g. `https://<backend-host>/api` |
 
 The variable reaches the build only if the generated workflow forwards it - the portal does not do
-that. Add it to the `Build And Deploy` step by hand, as step `env:` rather than `with:`, because
-the deploy action is a Docker action and Oryx reads the container's environment:
+that, so the `Build And Deploy` step carries it by hand, as step `env:` rather than `with:`,
+because the deploy action is a Docker action and Oryx reads the container's environment:
 
 ```yaml
         env:
           VITE_API_BASE_URL: ${{ vars.VITE_API_BASE_URL }}
 ```
 
-The backend is not hosted anywhere yet. Because the two run on different origins there is no
-`/api` proxy in production: the frontend calls the absolute `VITE_API_BASE_URL` (inlined at build
-time by Vite), and the backend must allow the Static Web Apps origin through
+The backend runs on Azure Container Apps (`petrotrend-backend`, resource group `PetroTrend`, Poland
+Central) from the `awahir/petrotrend-backend` image that `ci.yml` pushes to Docker Hub, against an
+Azure DocumentDB / Cosmos DB for MongoDB vCore database. Because the two run on different origins
+there is no `/api` proxy in production: the frontend calls the absolute `VITE_API_BASE_URL`
+(inlined at build time by Vite), and the backend must allow the Static Web Apps origin through
 `petrotrend.cors.allowed-origins` - as an env var that is
-`PETROTREND_CORS_ALLOWED_ORIGINS=https://<swa-host>`. Client-side routes need
-`PetroTrend.Frontend/public/staticwebapp.config.json`; without its `navigationFallback` a deep
-link like `/records` returns 404.
+`PETROTREND_CORS_ALLOWED_ORIGINS=https://<swa-host>`. Without the variable the bundle keeps the
+relative `/api` and the calls hit the Static Web App itself, so `/api/*` is in the fallback's
+`exclude`: they then fail as a plain 404 instead of as `index.html` parsed as JSON. Client-side
+routes need `PetroTrend.Frontend/public/staticwebapp.config.json`; without its `navigationFallback`
+a deep link like `/records` returns 404.
 
 ## AI agent documentation
 
