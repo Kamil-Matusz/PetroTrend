@@ -61,3 +61,8 @@ export function update(id: string, body: FuelPriceRequest): Promise<FuelPriceRes
 export function remove(id: string): Promise<void> {
   return request(`/fuelPrices/${id}`, { method: 'DELETE' })
 }
+
+/** Deletes every reading in the range - all fuels and all currencies, not just the filtered view. */
+export function removeRange(from: string, to: string): Promise<void> {
+  return request(`/fuelPrices/range?from=${from}&to=${to}`, { method: 'DELETE' })
+}

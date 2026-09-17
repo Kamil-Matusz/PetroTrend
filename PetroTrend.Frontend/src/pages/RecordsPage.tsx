@@ -12,10 +12,11 @@ import { CURRENCIES, FUEL_SYMBOLS } from '../api/types'
 import { Modal } from '../components/Modal'
 import { PriceForm } from '../components/PriceForm'
 import { PriceTable } from '../components/PriceTable'
+import { RangePurge } from '../components/RangePurge'
 import { Banner, Empty, ErrorNote, Loading } from '../components/States'
 import { useAsync } from '../hooks/useAsync'
 import { FUEL_META } from '../lib/fuel'
-import { formatDayNumeric, formatMoney } from '../lib/format'
+import { formatDayNumeric, formatMoney, pluralRecords } from '../lib/format'
 import './RecordsPage.css'
 
 const PAGE_SIZES = [10, 20, 50, 100]
@@ -24,6 +25,7 @@ type Dialog =
   | { mode: 'create' }
   | { mode: 'edit'; row: FuelPriceResponse }
   | { mode: 'delete'; row: FuelPriceResponse }
+  | { mode: 'purge' }
 
 export function RecordsPage() {
   const [fuelSymbol, setFuelSymbol] = useState<FuelSymbol | ''>('')
@@ -38,6 +40,7 @@ export function RecordsPage() {
   const [dialog, setDialog] = useState<Dialog | null>(null)
   const [saving, setSaving] = useState(false)
   const [saveError, setSaveError] = useState<unknown>(null)
+  const [purged, setPurged] = useState<number | null>(null)
 
   const { data, loading, error, reload } = useAsync(
     () =>
@@ -75,7 +78,7 @@ export function RecordsPage() {
   }
 
   const submit = async (request: FuelPriceRequest) => {
-    if (!dialog || dialog.mode === 'delete') return
+    if (dialog?.mode !== 'create' && dialog?.mode !== 'edit') return
     setSaving(true)
     setSaveError(null)
     try {
@@ -105,6 +108,13 @@ export function RecordsPage() {
     }
   }
 
+  const onPurged = (deleted: number) => {
+    closeDialog()
+    setPurged(deleted)
+    setPage(0)
+    reload()
+  }
+
   const hasFilters = Boolean(fuelSymbol || currency || from || to)
 
   return (
@@ -114,10 +124,24 @@ export function RecordsPage() {
           <h1>Notowania</h1>
           <p className="recs__count num">{meta ? `${meta.totalElements} odczytów` : '-'}</p>
         </div>
-        <button type="button" className="btn btn--primary" onClick={() => setDialog({ mode: 'create' })}>
-          Dodaj odczyt
-        </button>
+        <div className="recs__head-actions">
+          <button type="button" className="btn" onClick={() => setDialog({ mode: 'purge' })}>
+            Wyczyść okres
+          </button>
+          <button type="button" className="btn btn--primary" onClick={() => setDialog({ mode: 'create' })}>
+            Dodaj odczyt
+          </button>
+        </div>
       </div>
+
+      {purged != null && (
+        <p className="recs__notice" role="status">
+          Usunięto <span className="num">{purged}</span> {pluralRecords(purged)} z wybranego okresu.
+          <button type="button" className="recs__notice-close" onClick={() => setPurged(null)} aria-label="Zamknij komunikat">
+            ×
+          </button>
+        </p>
+      )}
 
       <section className="panel recs__filters" aria-label="Filtry">
         <div className="field">
@@ -281,6 +305,12 @@ export function RecordsPage() {
             onSubmit={submit}
             onCancel={closeDialog}
           />
+        </Modal>
+      )}
+
+      {dialog?.mode === 'purge' && (
+        <Modal title="Wyczyść okres" onClose={closeDialog}>
+          <RangePurge onClose={closeDialog} onDeleted={onPurged} />
         </Modal>
       )}
 

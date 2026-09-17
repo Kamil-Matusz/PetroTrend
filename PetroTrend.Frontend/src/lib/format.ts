@@ -62,3 +62,12 @@ export function monthStartIso(): string {
   const d = new Date()
   return toIso(new Date(d.getFullYear(), d.getMonth(), 1))
 }
+
+/** Polish plural for "notowanie" - 1 / 2-4 / rest, with the 12-14 exception. */
+export function pluralRecords(count: number): string {
+  if (count === 1) return 'notowanie'
+  const tens = count % 100
+  const ones = count % 10
+  if (tens >= 12 && tens <= 14) return 'notowań'
+  return ones >= 2 && ones <= 4 ? 'notowania' : 'notowań'
+}

@@ -13,4 +13,7 @@ public interface FuelPriceRepository extends MongoRepository<FuelPrice, String>,
 
     @Query(value = "{ 'date': { $gte: ?0, $lte: ?1 } }", sort = "{ 'date': -1 }")
     List<FuelPrice> findInDateRange(LocalDate from, LocalDate to);
+
+    @Query(value = "{ 'date': { $gte: ?0, $lte: ?1 } }", delete = true)
+    void deleteInDateRange(LocalDate from, LocalDate to);
 }

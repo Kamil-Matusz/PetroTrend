@@ -81,6 +81,10 @@ write rather than mutating any cache. There is no cache, no dedupe, no shared st
 - **Records** (`/notowania`, `RecordsPage`) - `GET /fuelPrices/search` with server-side filtering,
   sorting and pagination; every filter/sort/size change resets `page` to 0. Owns all CRUD: create,
   edit and delete each run through a single `Dialog` discriminated union rendered into `Modal`.
+  `RangePurge` (the `purge` dialog) wraps `DELETE /fuelPrices/range`, which ignores fuel and
+  currency and answers `204` with no count - so it keeps its own dates, separate from the table
+  filters, and reads the range back with `GET /fuelPrices/range` first: that preview is both the
+  confirmation step and the only honest source for the "usunięto N" notice.
 
 Filter and pagination state lives in `useState` on the page, not in the URL - deep links to a
 filtered view don't work today.

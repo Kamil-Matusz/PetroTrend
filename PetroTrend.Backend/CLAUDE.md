@@ -25,7 +25,7 @@ Docker must be running for both `bootRun` and `test`:
 
 ## API surface
 
-`/api/fuelPrices` - `GET` (all), `GET /latest?fuelSymbols=` (defaults to `ON,PB95`), `GET /currentMonth`, `GET /range?from=&to=`, `GET /search`, `GET /{id}`, `POST`, `PUT /{id}`, `DELETE /{id}`.
+`/api/fuelPrices` - `GET` (all), `GET /latest?fuelSymbols=` (defaults to `ON,PB95`), `GET /currentMonth`, `GET /range?from=&to=`, `GET /search`, `GET /{id}`, `POST`, `PUT /{id}`, `DELETE /{id}`, `DELETE /range?from=&to=` (bulk, 204).
 OpenAPI JSON at `/v3/api-docs`, Scalar UI at `/scalar`. Actuator is on the classpath.
 
 ## Architecture
@@ -40,7 +40,7 @@ Layering is strict and one-way: `controllers → services → repositories`, wit
 
 **Uniqueness.** Enforced by the `@CompoundIndex` on `(fuelSymbol, currency, date desc)` in `FuelPrice`, created at startup by `spring.data.mongodb.auto-index-creation: true`. There is no pre-read check - `FuelPriceService.save` catches `DuplicateKeyException` and rethrows `FuelPriceAlreadyExistsException`. Keep that pattern rather than adding an `existsBy` lookup.
 
-**Sorting is whitelisted.** `FuelPriceService.SORTABLE_PROPERTIES` (`date`, `price`) is validated against the incoming `Pageable`; anything else throws `InvalidSortPropertyException`. Add new sortable fields there, not just in the index. Page size is capped by `spring.data.web.pageable.max-page-size: 100`; `/search` defaults to `size=20, sort=date,desc`.
+**Sorting is whitelisted.** `FuelPriceValidator.SORTABLE_PROPERTIES` (`date`, `price`) is validated against the incoming `Pageable`; anything else throws `InvalidSortPropertyException`. Add new sortable fields there, not just in the index. Page size is capped by `spring.data.web.pageable.max-page-size: 100`; `/search` defaults to `size=20, sort=date,desc`.
 
 **CORS.** `WebConfig` maps `/api/**` and takes its allowed origins from
 `petrotrend.cors.allowed-origins` (comma-separated, defaults to the two Vite dev ports). Deployed

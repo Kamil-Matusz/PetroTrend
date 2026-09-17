@@ -28,6 +28,7 @@ import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
@@ -232,5 +233,28 @@ class FuelPriceControllerTest {
                 //then
                 .andExpect(status().isOk());
         verify(fuelPriceService).findByDateRange(LocalDate.of(2026, 8, 1), LocalDate.of(2026, 8, 31));
+    }
+
+    @Test
+    void deleteRangeReturnsNoContentAndBindsIsoDates() throws Exception {
+        //given
+
+        //when
+        mockMvc.perform(delete(RANGE_PATH).param("from", "2025-01-01").param("to", "2025-12-31"))
+                //then
+                .andExpect(status().isNoContent())
+                .andExpect(content().string(""));
+        verify(fuelPriceService).deleteByDateRange(LocalDate.of(2025, 1, 1), LocalDate.of(2025, 12, 31));
+    }
+
+    @Test
+    void deleteRangeRouteIsNotSwallowedByIdPathVariable() throws Exception {
+        //given
+
+        //when
+        mockMvc.perform(delete(RANGE_PATH).param("from", "2025-01-01").param("to", "2025-12-31"))
+                //then
+                .andExpect(status().isNoContent());
+        verify(fuelPriceService, never()).delete(any());
     }
 }

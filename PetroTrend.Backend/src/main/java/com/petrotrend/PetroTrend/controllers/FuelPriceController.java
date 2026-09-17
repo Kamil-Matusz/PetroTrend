@@ -83,6 +83,13 @@ public class FuelPriceController {
         return fuelPriceService.update(id, request);
     }
 
+    @DeleteMapping("/range")
+    @ResponseStatus(HttpStatus.NO_CONTENT)
+    public void deleteFuelPricesByDateRange(@RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) final LocalDate from,
+                                            @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) final LocalDate to) {
+        fuelPriceService.deleteByDateRange(from, to);
+    }
+
     @DeleteMapping("/{id}")
     @ResponseStatus(HttpStatus.NO_CONTENT)
     public void deleteFuelPrice(@PathVariable final String id) {

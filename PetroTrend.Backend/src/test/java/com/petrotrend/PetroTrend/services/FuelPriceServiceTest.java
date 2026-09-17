@@ -171,4 +171,30 @@ class FuelPriceServiceTest {
         assertThat(result.getContent()).hasSize(2);
         verify(fuelPriceMapper, never()).convertToResponses(any());
     }
+
+    @Test
+    void deleteByDateRangeRemovesEveryPriceInTheWindow() {
+        //given
+        final LocalDate from = LocalDate.of(2025, 1, 1);
+        final LocalDate to = LocalDate.of(2025, 12, 31);
+
+        //when
+        fuelPriceService.deleteByDateRange(from, to);
+
+        //then
+        verify(fuelPriceRepository).deleteInDateRange(from, to);
+    }
+
+    @Test
+    void invertedRangeOnDeleteThrowsWithoutHittingRepository() {
+        //given
+        final LocalDate from = LocalDate.of(2025, 12, 31);
+        final LocalDate to = LocalDate.of(2025, 1, 1);
+
+        //when
+        //then
+        assertThatThrownBy(() -> fuelPriceService.deleteByDateRange(from, to))
+                .isInstanceOf(InvalidDateRangeException.class);
+        verify(fuelPriceRepository, never()).deleteInDateRange(any(), any());
+    }
 }
