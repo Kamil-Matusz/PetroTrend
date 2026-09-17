@@ -158,27 +158,32 @@ All user-facing copy is Polish; code and identifiers are English.
 Backend: JUnit 5 with AssertJ and Mockito, `@WebMvcTest` for controllers, Testcontainers
 (`mongo:latest`) for the Spring context. Docker must be running.
 
-GitHub Actions (`.github/workflows/ci.yml`) runs two independent jobs on every push and on PRs to
-`main`: backend (`./gradlew build` on Temurin 21, test report uploaded as an artifact on failure)
-and frontend (`npm ci`, `npm run lint`, `npm run build` on Node 24).
+Everything runs from one workflow, `.github/workflows/ci.yml`. Two independent jobs gate every push
+and every PR to `main`: `backend` (`./gradlew build` on Temurin 21, test report uploaded as an
+artifact on failure) and `frontend` (`npm ci`, `npm run lint`, `npm run build` on Node 24). Each
+unlocks a delivery job: `docker` pushes the backend image to Docker Hub from `main` only, and
+`deploy_frontend` ships the frontend to Static Web Apps - production from `main`, a preview
+environment from a PR.
 
 ## Deployment
 
-The frontend deploys to Azure Static Web Apps from `.github/workflows/azure-static-web-apps-*.yml`
-- generated and committed to `main` by the Azure portal when the resource was linked to this repo,
-named after the app's default hostname, and independent of `ci.yml`. It is an ordinary file in the
-repo: Azure writes it once and never touches it again, so edit it freely.
+The frontend deploys to Azure Static Web Apps from the `deploy_frontend` job. The Azure portal
+generated a workflow of its own for this when the resource was linked to the repo - named after the
+app's default hostname and independent of `ci.yml` - and it was folded into `ci.yml`, so
+`needs: frontend` now makes a red lint or typecheck stop the deploy. The portal writes that file
+once and never touches it again, but re-linking the resource would put it back and both would then
+deploy.
 
 Azure's own Oryx builder installs and builds inside the deploy action's container
-(`app_location: ./PetroTrend.Frontend`, `output_location: dist` - `dist` because Vite, not the
-`build` that the portal's React preset suggests), so the deployed bundle is not the one `ci.yml`
-produced and a red `ci.yml` does not block a deploy. Oryx takes its Node version from
+(`app_location: PetroTrend.Frontend`, `output_location: dist` - `dist` because Vite, not the
+`build` that the portal's React preset suggests), so what ships is Oryx's own rebuild, not the
+bundle the `frontend` job produced. Oryx takes its Node version from
 `engines.node` in `package.json` - Vite 8 needs `>=22.12.0`, so that field is load-bearing rather
 than decorative, and a deploy failing on an unsupported Node version is fixed there (pin `22.x` if
 the range cannot be resolved).
 
 PRs to `main` get a preview environment of their own (the Free plan allows 3) with the URL
-commented on the PR; the generated `close_pull_request_job` tears it down when the PR closes.
+commented on the PR; `close_preview` tears it down when the PR closes.
 
 Two repository settings are required:
 
@@ -187,9 +192,9 @@ Two repository settings are required:
 | Secret | `AZURE_STATIC_WEB_APPS_API_TOKEN_<APP>` | added automatically by the portal; also under *Manage deployment token* on the resource |
 | Variable | `VITE_API_BASE_URL` | absolute backend base, e.g. `https://<backend-host>/api` |
 
-The variable reaches the build only if the generated workflow forwards it - the portal does not do
-that, so the `Build And Deploy` step carries it by hand, as step `env:` rather than `with:`,
-because the deploy action is a Docker action and Oryx reads the container's environment:
+The variable reaches the build only if the workflow forwards it - the portal's generated version did
+not. The deploy step carries it as step `env:` rather than `with:`, because the deploy action is a
+Docker action and Oryx reads the container's environment:
 
 ```yaml
         env:
