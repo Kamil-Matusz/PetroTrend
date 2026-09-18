@@ -4,12 +4,16 @@ A fuel price tracking application (ON, PB95, PB98, LPG). The backend is a Spring
 backed by MongoDB; the frontend is a React + TypeScript UI styled after a roadside station
 price pylon.
 
+The hosted GUI is on Azure Static Web Apps:
+
+[https://mango-desert-058d15b03.5.azurestaticapps.net/notowania](https://mango-desert-058d15b03.5.azurestaticapps.net/notowania)
+
 The repository holds two independent projects:
 
 | Directory | What it is | Stack |
 |---|---|---|
 | `PetroTrend.Backend` | REST API and data layer | Java 21, Spring Boot 4.1.1, MongoDB, Gradle 9.7.1 |
-| `PetroTrend.Frontend` | user interface | React 19, TypeScript, Vite 8, react-router, recharts |
+| `PetroTrend.Frontend` | User interface | React 19, TypeScript, Vite 8, react-router, recharts |
 
 ## Requirements
 
@@ -169,6 +173,8 @@ environment from a PR.
 
 ## Deployment
 
+The production GUI is at [https://mango-desert-058d15b03.5.azurestaticapps.net/notowania](https://mango-desert-058d15b03.5.azurestaticapps.net/notowania).
+
 The frontend deploys to Azure Static Web Apps from the `deploy_frontend` job. The Azure portal
 generated a workflow of its own for this when the resource was linked to the repo - named after the
 app's default hostname and independent of `ci.yml` - and it was folded into `ci.yml`, so
@@ -218,7 +224,7 @@ there is no `/api` proxy in production: the frontend calls the absolute `VITE_AP
 relative `/api` and the calls hit the Static Web App itself, so `/api/*` is in the fallback's
 `exclude`: they then fail as a plain 404 instead of as `index.html` parsed as JSON. Client-side
 routes need `PetroTrend.Frontend/public/staticwebapp.config.json`; without its `navigationFallback`
-a deep link like `/records` returns 404.
+a deep link like `/notowania` returns 404.
 
 ## AI agent documentation
 
